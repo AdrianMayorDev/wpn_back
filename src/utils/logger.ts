@@ -1,3 +1,3 @@
 export const logger = (message: string) => {
-	console.log(`[LOG] ${message}`);
+  console.log(`[LOG] ${message}`);
 };

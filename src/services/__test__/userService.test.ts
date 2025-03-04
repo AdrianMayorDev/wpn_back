@@ -1,25 +1,41 @@
-import { logger } from "@/utils/logger";
+import {
+  getUserData,
+  createUserData,
+  updateUserData,
+  deleteUserData,
+} from '@/services/userService';
+import { logger } from '@/utils/logger';
 
-export const getUserData = (userID: string) => {
-	logger(`Fetching user data for userID: ${userID}`);
-	// Aquí iría la lógica para obtener los datos del usuario, por ejemplo, una consulta a la base de datos.
-	return `User data for userID: ${userID}`;
-};
+// Mocke logger function to avoid console logs
+jest.mock('@/utils/logger');
 
-export const createUserData = () => {
-	logger("Creating user");
-	// Aquí iría la lógica para crear un usuario, por ejemplo, una inserción en la base de datos.
-	return "User created";
-};
+describe('User Service', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
-export const updateUserData = () => {
-	logger("Updating user");
-	// Aquí iría la lógica para actualizar un usuario, por ejemplo, una actualización en la base de datos.
-	return "User updated";
-};
+  it('should get user data', () => {
+    const userID = '123';
+    const result = getUserData(userID);
+    expect(result).toBe(`User data for userID: ${userID}`);
+    expect(logger).toHaveBeenCalledWith(`Fetching user data for userID: ${userID}`);
+  });
 
-export const deleteUserData = () => {
-	logger("Deleting user");
-	// Aquí iría la lógica para eliminar un usuario, por ejemplo, una eliminación en la base de datos.
-	return "User deleted";
-};
+  it('should create user data', () => {
+    const result = createUserData();
+    expect(result).toBe('User created');
+    expect(logger).toHaveBeenCalledWith('Creating user');
+  });
+
+  it('should update user data', () => {
+    const result = updateUserData();
+    expect(result).toBe('User updated');
+    expect(logger).toHaveBeenCalledWith('Updating user');
+  });
+
+  it('should delete user data', () => {
+    const result = deleteUserData();
+    expect(result).toBe('User deleted');
+    expect(logger).toHaveBeenCalledWith('Deleting user');
+  });
+});
