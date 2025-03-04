@@ -1,6 +1,5 @@
-import express, { Express, Request, Response } from "express";
 import dotenv from "dotenv";
-import { logger } from "@/utils/logger";
+import express, { Express } from "express";
 import userRoutes from "./routes/userRoutes";
 
 dotenv.config();
