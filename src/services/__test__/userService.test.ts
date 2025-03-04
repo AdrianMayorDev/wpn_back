@@ -1,9 +1,4 @@
-import {
-  getUserData,
-  createUserData,
-  updateUserData,
-  deleteUserData,
-} from '@/services/userService';
+import { getUserData, createUserData, updateUserData, deleteUserData } from '@/services/userService';
 import { logger } from '@/utils/logger';
 
 // Mocke logger function to avoid console logs
