@@ -11,9 +11,6 @@ const port = process.env.SERVER_PORT ?? 3005;
 app.use(express.json());
 app.use('/user', userRoutes);
 
-// const dummyFunction = () => {
-// 	console.log("This is a dummy function");
-// };
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);
 });
