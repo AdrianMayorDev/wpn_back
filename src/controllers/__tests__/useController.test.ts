@@ -1,10 +1,5 @@
 import type { Request, Response } from 'express';
-import {
-  getUserController,
-  createUserController,
-  updateUserController,
-  deleteUserController,
-} from '@/controllers/userController';
+import { getUserController, createUserController, updateUserController, deleteUserController } from '@/controllers/userController';
 import * as userService from '@/services/userService';
 
 describe('User Controller', () => {
