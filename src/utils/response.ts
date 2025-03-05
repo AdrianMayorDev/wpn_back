@@ -1,15 +1,9 @@
-import { ApiResponse } from '@/interfaces/response.internface';
+import { IApiResponse } from '@/interfaces/response.interface';
 
-export const createResponse = <T>(
-  status: 'success' | 'error',
-  message: string,
-  data?: T,
-  error?: string
-): ApiResponse<T> => {
+export const createResponse = <T>(status: 'success' | 'error', message: string, data?: T): IApiResponse<T> => {
   return {
     status,
     message,
     data,
-    error,
   };
 };
