@@ -11,6 +11,7 @@ export interface IUserBase {
   username: string;
   email: string;
   table?: string;
+  newPassword?: string;
 }
 
 export interface IUserWithPassword extends IUserBase {
@@ -20,3 +21,10 @@ export interface IUserWithPassword extends IUserBase {
 export interface IUserWithID extends Omit<IUserWithPassword, 'id'> {
   id: number;
 }
+
+export interface IUserPayload {
+  id: number;
+  email: string;
+}
+
+export interface IUserLogin extends Omit<IUserWithPassword, 'username' | 'id'> {}

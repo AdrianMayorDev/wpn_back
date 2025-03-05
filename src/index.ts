@@ -1,7 +1,7 @@
 import dotenv from 'dotenv';
 import express, { Express } from 'express';
 import userRoutes from './routes/userRoutes';
-import { errorHandler } from './middlewares/errorHandler';
+import { errorMiddleware } from './middlewares/errorMiddleware';
 
 dotenv.config();
 
@@ -14,7 +14,7 @@ app.use(express.json());
 app.use('/user', userRoutes);
 
 // Error Middleware
-app.use(errorHandler);
+app.use(errorMiddleware);
 
 // Listen Middleware
 app.listen(port, () => {

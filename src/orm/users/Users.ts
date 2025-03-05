@@ -12,7 +12,7 @@ export class User extends BaseQuery<IUserWithID> {
   }
 
   async getUserByEmail(email: string): Promise<IUserWithID | null> {
-    const selectFields = [this.fields.EMAIL];
+    const selectFields = [this.fields.ID, this.fields.EMAIL, this.fields.PASSWORD];
     return await this.getByField(selectFields, 'email', email);
   }
 }
