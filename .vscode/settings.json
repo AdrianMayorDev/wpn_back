@@ -3,7 +3,7 @@
   "editor.insertSpaces": true,
   "editor.detectIndentation": false,
   "editor.indentSize": 2,
-  "editor.wordWrap": "off",
+  "editor.wordWrap": "on",
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "[typescript]": {
