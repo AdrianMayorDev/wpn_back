@@ -4,7 +4,6 @@
     "es2021": true
   },
   "extends": ["standard-with-typescript", "prettier"],
-  "overrides": [],
   "parserOptions": {
     "ecmaVersion": "latest",
     "sourceType": "module",
@@ -24,6 +23,19 @@
     // "@typescript-eslint/no-unsafe-argument": "off"
 
     // "prettier/prettier": "error"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.ts", "**/*.spec.ts"], // Just in tests
+      "rules": {
+        "@typescript-eslint/no-misused-promises": [
+          "error",
+          {
+            "checksVoidReturn": false
+          }
+        ]
+      }
+    }
+  ]
   // "ignorePatterns": ["dist/", "node_modules/", "**/*.test.ts", "**/__tests__/**"]
 }

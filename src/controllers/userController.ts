@@ -1,10 +1,10 @@
-import UserService from '@/services/userService';
+import UserService from '../services/userService';
 import { CustomError } from '@/utils/CustomError';
 import { logger } from '@/utils/logger';
 import { createResponse } from '@/utils/response';
 import { NextFunction, Request, Response } from 'express';
 
-export const getUserController = async (req: Request, res: Response, next: NextFunction) => {
+const getUserController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { userId }: Record<string, string> = req.params;
     const id = Number(userId);
@@ -21,7 +21,7 @@ export const getUserController = async (req: Request, res: Response, next: NextF
   }
 };
 
-export const createUserController = async (req: Request, res: Response, next: NextFunction) => {
+const createUserController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { username, email, password }: Record<string, string> = req.body;
 
@@ -36,7 +36,7 @@ export const createUserController = async (req: Request, res: Response, next: Ne
   }
 };
 
-export const loginUserController = async (req: Request, res: Response, next: NextFunction) => {
+const loginUserController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { email, password }: Record<string, string> = req.body;
 
@@ -52,7 +52,7 @@ export const loginUserController = async (req: Request, res: Response, next: Nex
   }
 };
 
-export const updateUserController = async (req: Request, res: Response, next: NextFunction) => {
+const updateUserController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { username, email, newPassword, password }: Record<string, string> = req.body;
     const id = Number(req.user?.id);
@@ -78,7 +78,7 @@ export const updateUserController = async (req: Request, res: Response, next: Ne
   }
 };
 
-export const deleteUserController = async (req: Request, res: Response, next: NextFunction) => {
+const deleteUserController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { password }: Record<string, string> = req.body;
     const id = Number(req.user?.id);
@@ -98,3 +98,5 @@ export const deleteUserController = async (req: Request, res: Response, next: Ne
     next(err);
   }
 };
+
+export { getUserController, createUserController, updateUserController, loginUserController, deleteUserController };

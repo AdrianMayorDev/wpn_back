@@ -2,7 +2,7 @@ import { IUserBase, IUserPayload } from '@/interfaces/user.interface';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { CustomError } from '../utils/CustomError';
-import UserService from '@/services/userService';
+import UserService from '../services/userService';
 
 const JWT_SECRET = process.env.JWT_SECRET ?? 'your_jwt_secret';
 
