@@ -72,8 +72,10 @@ class UserService {
         throw new CustomError('This email is already in use by your account', 400);
       }
 
+      logger.info(`Checking if email ${newEmail} is already in use by another user`);
       const existingEmailUser = await this.userQuery.getUserByEmail(newEmail);
-      if (existingEmailUser?.id !== currentUser.id) {
+      console.info(`Existing user: `, existingEmailUser);
+      if (existingEmailUser && existingEmailUser?.id !== currentUser.id) {
         throw new CustomError('Email already in use by another user', 409);
       }
     }
