@@ -18,37 +18,62 @@ jest.mock('@/middlewares/authMiddleware', () => ({
   }),
 }));
 
-describe('User routes', () => {
+describe('User routes suite', () => {
   it('GET /user should trigger getUserController', async () => {
-    const spy = jest.spyOn(userController, 'getUserController');
+    // Given
     await request(app).get('/user/1');
+
+    // When
+    const spy = jest.spyOn(userController, 'getUserController');
+
+    // Then
     expect(spy).toHaveBeenCalled();
   });
 
   it('POST /user should trigger createUserController', async () => {
-    const spy = jest.spyOn(userController, 'createUserController');
+    // Given
     await request(app).post('/user');
+
+    // When
+    const spy = jest.spyOn(userController, 'createUserController');
+
+    // Then
     expect(spy).toHaveBeenCalled();
   });
 
   it('PUT /user should trigger updateUserController', async () => {
+    // Given
+    await request(app).put('/user/');
+
+    // When
     const authSpy = jest.spyOn(authMiddle, 'authMiddleware');
     const controllerSpy = jest.spyOn(userController, 'updateUserController');
-    await request(app).put('/user/');
+
+    // Then
     expect(authSpy).toHaveBeenCalled();
     expect(controllerSpy).toHaveBeenCalled();
   });
 
   it('POST /user/login should trigger loginUserController', async () => {
-    const spy = jest.spyOn(userController, 'loginUserController');
+    // Given
     await request(app).post('/user/login');
+
+    // When
+    const spy = jest.spyOn(userController, 'loginUserController');
+
+    // Then
     expect(spy).toHaveBeenCalled();
   });
 
   it('DELETE /user should trigger deleteUserController', async () => {
+    // Given
+    await request(app).delete('/user/');
+
+    // When
     const authSpy = jest.spyOn(authMiddle, 'authMiddleware');
     const controllerSpy = jest.spyOn(userController, 'deleteUserController');
-    await request(app).delete('/user/');
+
+    // Then
     expect(authSpy).toHaveBeenCalled();
     expect(controllerSpy).toHaveBeenCalled();
   });

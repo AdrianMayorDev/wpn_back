@@ -131,6 +131,8 @@ class UserService {
     if (!user) {
       throw new CustomError('User not found', 404);
     } else {
+      logger.info(`User found: ${user.email}`);
+      console.info(user);
       return user;
     }
   }

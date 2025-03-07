@@ -10,7 +10,7 @@
   "name": "wpn_back",
   "description": "",
   "version": "1.0.0",
-  "main": "dist/index.js",
+  "main": "dist/server.js",
   "scripts": {
     "prepare": "husky && husky install",
     "build": "npx tsc --project tsconfig.build.json && tsc-alias -p tsconfig.json",
