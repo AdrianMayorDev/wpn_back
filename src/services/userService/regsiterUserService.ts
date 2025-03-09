@@ -5,7 +5,7 @@ import { logger } from '@/utils/logger';
 import { isValidEmail, isValidPassword } from '@/utils/userValidations';
 import bcrypt from 'bcryptjs';
 
-async function registerUserService(userQuery: UserModel, user: IUserWithPassword): Promise<IUserBase> {
+const registerUserService = async (userQuery: UserModel, user: IUserWithPassword): Promise<IUserBase> => {
   const { email, password, steamNick, steamId } = user;
   logger.info(`email: ${email}, password: ${password}, steamNick: ${steamNick}`);
 
@@ -41,6 +41,6 @@ async function registerUserService(userQuery: UserModel, user: IUserWithPassword
   const userToRegister = { email, password: hashedPassword, steamNick, steamId };
   const response = await userQuery.createNewUser(userToRegister);
   return response;
-}
+};
 
 export default registerUserService;

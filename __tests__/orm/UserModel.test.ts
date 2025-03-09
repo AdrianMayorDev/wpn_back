@@ -1,11 +1,11 @@
-import { User } from '@/orm/users/Users';
-import { IUserWithID, UserFields } from '@/interfaces/user.interface';
+import { UserModel } from '@/orm/users/UsersModel';
+import { IUserWithID, UserFields } from '@/interfaces/userModel.interface';
 import { BaseQuery } from '@/orm/base/baseQuery';
 
 jest.mock('@/orm/base/baseQuery');
 
 describe('User ORM class', () => {
-  let userInstance: User;
+  let userInstance: UserModel;
   let mockBaseQuery: Partial<BaseQuery<IUserWithID>>;
 
   beforeEach(() => {
@@ -13,7 +13,7 @@ describe('User ORM class', () => {
     mockBaseQuery = {
       getByField: jest.fn(),
     };
-    userInstance = new User(1);
+    userInstance = new UserModel(1);
   });
 
   it('should initialize with the correct id', () => {
@@ -26,7 +26,8 @@ describe('User ORM class', () => {
     const mockUser: IUserWithID = {
       id: 1,
       email: 'john@example.com',
-      username: 'JohnDoe',
+      steamNick: 'JohnDoe',
+      steamId: '',
       password: 'hashedPassword',
     };
 

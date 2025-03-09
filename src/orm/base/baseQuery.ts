@@ -7,7 +7,7 @@ export abstract class BaseQuery<T> {
   protected abstract table: string;
   protected abstract id: number | null;
 
-  protected async insert(data: Partial<T>): Promise<T> {
+  async insert(data: Partial<T>): Promise<T> {
     const connection = await getConnection();
     const keys = Object.keys(data).join(', ');
     const values = Object.values(data);
@@ -24,7 +24,7 @@ export abstract class BaseQuery<T> {
     }
   }
 
-  protected async update(data: Partial<T>): Promise<T> {
+  async update(data: Partial<T>): Promise<T> {
     const connection = await getConnection();
     try {
       const keys = Object.keys(data)
@@ -43,7 +43,7 @@ export abstract class BaseQuery<T> {
     }
   }
 
-  protected async delete(): Promise<void> {
+  async delete(): Promise<void> {
     const connection = await getConnection();
     try {
       await connection.execute(`DELETE FROM ${this.table} WHERE id = ?`, [this.id]);
@@ -54,7 +54,7 @@ export abstract class BaseQuery<T> {
     }
   }
 
-  protected async getById(selectKeys: string[]): Promise<T | null> {
+  async getById(selectKeys: string[]): Promise<T | null> {
     const connection = await getConnection();
     try {
       const select = selectKeys.join(', ');
@@ -73,7 +73,7 @@ export abstract class BaseQuery<T> {
     }
   }
 
-  protected async getByField(selectFields: string[], field: string, value: string): Promise<T | null> {
+  async getByField(selectFields: string[], field: string, value: string): Promise<T | null> {
     const connection = await getConnection();
     try {
       const select = selectFields.join(', ');

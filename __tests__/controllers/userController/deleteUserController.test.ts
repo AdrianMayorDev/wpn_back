@@ -30,7 +30,7 @@ describe('deleteUserController suite', () => {
 
     // Given
     req.body = { password: 'P@sword123' };
-    req.user = { id: 1, username: 'John Doe', email: 'john@example.com' };
+    req.user = { id: 1, steamNick: 'John Doe', steamId: '', email: 'john@example.com' };
 
     // When
     // Mock the service behavior
@@ -50,7 +50,7 @@ describe('deleteUserController suite', () => {
 
     // Given
     req.body = {};
-    req.user = { id: 1, username: 'John Doe', email: 'john@example' };
+    req.user = { id: 1, steamNick: 'John Doe', steamId: '', email: 'john@example' };
 
     // When
     await deleteUserController(req, res as Response, next);
@@ -78,7 +78,7 @@ describe('deleteUserController suite', () => {
 
     // Given
     req.body = { password: 'P@sword123' };
-    req.user = { id: NaN, username: '', email: '' };
+    req.user = { id: NaN, steamNick: 'John Doe', steamId: '', email: '' };
 
     // When
     await deleteUserController(req, res as Response, next);
@@ -92,7 +92,7 @@ describe('deleteUserController suite', () => {
 
     // Given
     req.body = { email: 'john@example.com', password: 'P@sword123' };
-    req.user = { id: 1, username: 'John Doe', email: 'john@example.com' };
+    req.user = { id: 1, steamNick: 'John Doe', steamId: '', email: 'john@example.com' };
 
     // When
     (UserService as jest.Mock).mockImplementation(() => ({

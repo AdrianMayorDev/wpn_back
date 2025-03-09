@@ -5,7 +5,7 @@ import { logger } from '@/utils/logger';
 import { isValidEmail, isValidPassword } from '@/utils/userValidations';
 import bcrypt from 'bcryptjs';
 
-async function updateUserService(userQuery: UserModel, user: IUserWithPassword): Promise<void> {
+const updateUserService = async (userQuery: UserModel, user: IUserWithPassword): Promise<void> => {
   const { email: newEmail, password, steamNick: newSteamNick, steamId, newPassword } = user;
 
   const selectFields = [UserFields.ALL];
@@ -69,5 +69,5 @@ async function updateUserService(userQuery: UserModel, user: IUserWithPassword):
 
   // Updating user
   await userQuery.updateUser(userToUpdate);
-}
+};
 export default updateUserService;

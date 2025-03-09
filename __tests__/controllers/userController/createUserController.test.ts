@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 import UserService from '@/services/userService';
 import { createResponse } from '@/utils/response';
 import { CustomError } from '@/utils/CustomError';
-import { IUserBase } from '@/interfaces/user.interface';
+import { IUserBase } from '@/interfaces/userModel.interface';
 
 // Mocks dependency
 jest.mock('@/services/UserService');
@@ -27,7 +27,7 @@ describe('createUserController suite', () => {
   });
 
   it('Should return a 201 status code if a user is created', async () => {
-    const mockUser: IUserBase = { id: 1, username: 'John Doe', email: 'john@example.com' };
+    const mockUser: IUserBase = { id: 1, steamNick: 'John Doe', steamId: '', email: 'john@example.com' };
     const expectedResponse = createResponse('success', 'User created', mockUser);
     // Given
     req.body = { username: 'John Doe', email: 'john@example.com', password: 'P@sword123' };

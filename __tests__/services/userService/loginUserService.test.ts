@@ -1,145 +1,78 @@
-import { IUserLogin, IUserWithID } from '@/interfaces/user.interface';
-import { User } from '@/orm/users/Users';
-import UserService from '@/services/userService';
+import { IUserLogin, IUserPayload } from '@/interfaces/userModel.interface';
+import { UserModel } from '@/orm/users/UsersModel';
 import { CustomError } from '@/utils/CustomError';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
+import loginUserService from '@/services/userService/loginUserService';
 
-jest.mock('@/orm/users/Users');
-jest.mock('bcryptjs', () => ({
-  compare: jest.fn(),
-}));
-jest.mock('jsonwebtoken', () => ({
-  sign: jest.fn(),
-}));
+jest.mock('@/orm/users/UsersModel');
+jest.mock('bcryptjs');
+jest.mock('jsonwebtoken');
 
-describe('User service loginUser', () => {
-  let mockService: UserService;
-  let mockUserQueries: Partial<User>;
-  let mockCurrentUser: IUserWithID;
+describe('loginUserService', () => {
+  let userQuery: jest.Mocked<UserModel>;
+  let credentials: IUserLogin;
+  let user: IUserPayload;
 
   beforeEach(() => {
-    jest.resetAllMocks();
-
-    // Mock needed methods
-    mockUserQueries = {
-      getUserByEmail: jest.fn(),
+    userQuery = new UserModel() as jest.Mocked<UserModel>;
+    credentials = {
+      email: 'test@example.com',
+      password: 'password123',
     };
-
-    (User as jest.Mock).mockImplementation(() => mockUserQueries);
-
-    mockService = new UserService();
-
-    // Simulate a current user
-    mockCurrentUser = {
+    user = {
       id: 1,
-      email: 'john@example.com',
-      username: 'JohnDoe',
-      password: 'hashedPassword',
+      email: 'test@example.com',
     };
   });
 
-  it('should login a user successfully', async () => {
+  it('should throw an error if the email is not found', async () => {
     // Given
-    const inputUser: IUserLogin = {
-      email: 'john@example.com',
-      password: 'P@ssword123',
-    };
-
-    const token = 'jwtToken';
+    userQuery.getUserByEmail.mockResolvedValue(null);
 
     // When
-    mockUserQueries.getUserByEmail = jest.fn().mockResolvedValue(mockCurrentUser);
-    bcrypt.compare = jest.fn().mockResolvedValue(true);
-    jwt.sign = jest.fn().mockReturnValue(token);
+    const loginUser = loginUserService(userQuery, credentials);
 
     // Then
-    const result = await mockService.loginUser(inputUser);
-
-    expect(mockUserQueries.getUserByEmail).toHaveBeenCalledWith(inputUser.email);
-    expect(bcrypt.compare).toHaveBeenCalledWith(inputUser.password, mockCurrentUser.password);
-    expect(jwt.sign).toHaveBeenCalledWith(
-      { id: mockCurrentUser.id, email: mockCurrentUser.email },
-      expect.any(String),
-      { expiresIn: '3d' }
-    );
-    expect(result).toEqual({ token });
-  });
-
-  it('should throw an error if the user is not found', async () => {
-    const expectedResponse = new CustomError('Invalid email or password', 401);
-    // Given
-    const inputUser: IUserLogin = {
-      email: 'john@example.com',
-      password: 'P@ssword123',
-    };
-
-    // When
-    mockUserQueries.getUserByEmail = jest.fn().mockResolvedValue(null);
-
-    // Then
-    try {
-      await mockService.loginUser(inputUser);
-    } catch (error) {
-      expect(error).toEqual(expectedResponse);
-    }
-
-    expect(mockUserQueries.getUserByEmail).toHaveBeenCalledWith(inputUser.email);
-    expect(bcrypt.compare).not.toHaveBeenCalled();
-    expect(jwt.sign).not.toHaveBeenCalled();
+    await expect(loginUser).rejects.toThrow(CustomError);
+    await expect(loginUser).rejects.toThrow('Invalid email or password');
   });
 
   it('should throw an error if the password is incorrect', async () => {
-    const expectedResponse = new CustomError('Invalid email or password', 401);
     // Given
-    const inputUser: IUserLogin = {
-      email: 'john@example.com',
-      password: 'incorrectPassword',
-    };
+    userQuery.getUserByEmail.mockResolvedValue({
+      ...user,
+      password: 'hashedPassword',
+      steamId: '123456789',
+      steamNick: 'testNick',
+    });
+    (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
     // When
-    mockUserQueries.getUserByEmail = jest.fn().mockResolvedValue(mockCurrentUser);
-    bcrypt.compare = jest.fn().mockResolvedValue(false);
+    const loginUser = loginUserService(userQuery, credentials);
 
     // Then
-    try {
-      await mockService.loginUser(inputUser);
-    } catch (error) {
-      expect(error).toEqual(expectedResponse);
-    }
-
-    expect(mockUserQueries.getUserByEmail).toHaveBeenCalledWith(inputUser.email);
-    expect(bcrypt.compare).toHaveBeenCalledWith(inputUser.password, mockCurrentUser.password);
-    expect(jwt.sign).not.toHaveBeenCalled();
+    await expect(loginUser).rejects.toThrow(CustomError);
+    await expect(loginUser).rejects.toThrow('Invalid email or password');
   });
 
-  it('should throw an error if the user id or email is missing', async () => {
-    const expectedResponse = new CustomError('User not found', 404);
+  it('should return a JWT token if the login is successful', async () => {
     // Given
-    const inputUser: IUserLogin = {
-      email: 'john@example.com',
-      password: 'P@ssword123',
-    };
-
-    const invalidUser = {
-      ...mockCurrentUser,
-      id: undefined,
-      email: undefined,
-    };
+    userQuery.getUserByEmail.mockResolvedValue({
+      ...user,
+      password: 'hashedPassword',
+      steamId: '123456789',
+      steamNick: 'testNick',
+    });
+    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+    const token = 'jwt_token';
+    (jwt.sign as jest.Mock).mockReturnValue(token);
 
     // When
-    mockUserQueries.getUserByEmail = jest.fn().mockResolvedValue(invalidUser);
-    bcrypt.compare = jest.fn().mockResolvedValue(true);
+    const result = await loginUserService(userQuery, credentials);
 
     // Then
-    try {
-      await mockService.loginUser(inputUser);
-    } catch (error) {
-      expect(error).toEqual(expectedResponse);
-    }
-
-    expect(mockUserQueries.getUserByEmail).toHaveBeenCalledWith(inputUser.email);
-    expect(bcrypt.compare).toHaveBeenCalledWith(inputUser.password, mockCurrentUser.password);
-    expect(jwt.sign).not.toHaveBeenCalled();
+    expect(result).toEqual({ token });
+    expect(jwt.sign).toHaveBeenCalledWith({ id: user.id, email: user.email }, 'your_jwt_secret', { expiresIn: '3d' });
   });
 });

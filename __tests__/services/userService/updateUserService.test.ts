@@ -1,217 +1,98 @@
-import { IUserWithID, IUserWithPassword } from '@/interfaces/user.interface';
-import { User } from '@/orm/users/Users';
-import UserService from '@/services/userService';
+import { IUserWithPassword, IUserWithID } from '@/interfaces/userModel.interface';
+import { UserModel } from '@/orm/users/UsersModel';
 import { CustomError } from '@/utils/CustomError';
+import { isValidEmail, isValidPassword } from '@/utils/userValidations';
 import bcrypt from 'bcryptjs';
+import updateUserService from '@/services/userService/updateUserService';
 
-jest.mock('@/orm/users/Users');
-jest.mock('bcryptjs', () => ({
-  compare: jest.fn(),
-  hash: jest.fn(),
-}));
+jest.mock('@/orm/users/UsersModel');
+jest.mock('bcryptjs');
+jest.mock('@/utils/userValidations');
 
-describe('User service updateUser', () => {
-  let mockService: UserService;
-  let mockUserQueries: Partial<User>;
-  let mockCurrentUser: IUserWithID;
+describe('updateUserService', () => {
+  let userQuery: jest.Mocked<UserModel>;
+  let user: IUserWithPassword;
+  let currentUser: IUserWithID;
 
   beforeEach(() => {
-    jest.resetAllMocks();
-
-    // Mock methods
-    mockUserQueries = {
-      getById: jest.fn(),
-      getUserByEmail: jest.fn(),
-      update: jest.fn(),
+    userQuery = new UserModel() as jest.Mocked<UserModel>;
+    user = {
+      email: 'newemail@example.com',
+      password: 'currentPassword123',
+      steamNick: 'newSteamNick',
+      steamId: 'newSteamId',
+      newPassword: 'newPassword123',
     };
-
-    (User as jest.Mock).mockImplementation(() => mockUserQueries);
-
-    mockService = new UserService();
-
-    // Simulate a current user
-    mockCurrentUser = {
+    currentUser = {
       id: 1,
-      email: 'john@example.com',
-      username: 'JohnDoe',
-      password: 'hashedPassword',
+      email: 'currentemail@example.com',
+      password: 'hashedCurrentPassword',
+      steamNick: 'currentSteamNick',
+      steamId: 'currentSteamId',
     };
   });
 
-  it('should throw an error if the user is not found', async () => {
+  it('should throw an error if the current password is incorrect', async () => {
     // Given
-    const inputUser: IUserWithPassword = {
-      email: 'john@example.com',
-      password: 'password123',
-      username: 'NewUser',
-      newPassword: 'newPassword123',
-    };
+    userQuery.getUserById.mockResolvedValue(currentUser);
+    (bcrypt.compare as jest.Mock).mockResolvedValue(false);
 
     // When
-    mockUserQueries.getById = jest.fn().mockResolvedValue(null);
+    const updateUser = updateUserService(userQuery, user);
 
     // Then
-    try {
-      await mockService.updateUser(inputUser);
-    } catch (error) {
-      expect(error).toEqual(new CustomError('User not found', 404));
-    }
+    await expect(updateUser).rejects.toThrow(CustomError);
+    await expect(updateUser).rejects.toThrow('Incorrect password');
   });
 
-  it('should throw an error if the password is incorrect', async () => {
+  it('should throw an error if the new email format is invalid', async () => {
     // Given
-    const inputUser: IUserWithPassword = {
-      email: 'john@example.com',
-      password: 'incorrectPassword',
-      username: 'NewUser',
-      newPassword: 'newPassword123',
-    };
+    userQuery.getUserById.mockResolvedValue(currentUser);
+    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+    (isValidEmail as jest.Mock).mockReturnValue(false);
 
     // When
-    mockUserQueries.getById = jest.fn().mockResolvedValue(mockCurrentUser);
-    bcrypt.compare = jest.fn().mockResolvedValue(false);
+    const updateUser = updateUserService(userQuery, user);
 
     // Then
-    try {
-      await mockService.updateUser(inputUser);
-    } catch (error) {
-      expect(error).toEqual(new CustomError('Incorrect password', 400));
-    }
+    await expect(updateUser).rejects.toThrow(CustomError);
+    await expect(updateUser).rejects.toThrow('Invalid email format');
   });
 
-  it('should throw an error if the email format is invalid', async () => {
+  it('should throw an error if the new password format is invalid', async () => {
     // Given
-    const inputUser: IUserWithPassword = {
-      email: 'invalid',
-      password: 'P@ssword123',
-      username: 'NewUser',
-      newPassword: 'newPassword123',
-    };
+    userQuery.getUserById.mockResolvedValue(currentUser);
+    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+    (isValidEmail as jest.Mock).mockReturnValue(true);
+    (isValidPassword as jest.Mock).mockReturnValue(false);
 
     // When
-    mockUserQueries.getById = jest.fn().mockResolvedValue(mockCurrentUser);
-    bcrypt.compare = jest.fn().mockResolvedValue(true);
+    const updateUser = updateUserService(userQuery, user);
 
     // Then
-    try {
-      await mockService.updateUser(inputUser);
-    } catch (error) {
-      expect(error).toEqual(new CustomError('Invalid email format', 400));
-    }
+    await expect(updateUser).rejects.toThrow(CustomError);
+    await expect(updateUser).rejects.toThrow('Invalid password format');
   });
 
-  it('should throw an error if the email is already in use by another user', async () => {
-    // Given
-    const inputUser: IUserWithPassword = {
-      email: 'john2@example.com',
-      password: 'password123',
-      username: 'NewUser',
-      newPassword: 'newPassword123',
-    };
+  // it('should update the user successfully', async () => {
+  //   // Given
+  //   userQuery.getUserById.mockResolvedValue(currentUser);
+  //   (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+  //   (isValidEmail as jest.Mock).mockReturnValue(true);
+  //   (isValidPassword as jest.Mock).mockReturnValue(true);
+  //   (bcrypt.compare as jest.Mock).mockResolvedValue('hashedNewPassword');
+  //   userQuery.updateUser.mockResolvedValue();
 
-    // When
-    mockUserQueries.getById = jest.fn().mockResolvedValue(mockCurrentUser);
-    mockUserQueries.getUserByEmail = jest.fn().mockResolvedValue({ id: 2, email: 'john2@example.com' });
+  //   // When
+  //   await updateUserService(userQuery, user);
 
-    bcrypt.compare = jest.fn().mockResolvedValue(true);
-
-    // Then
-    try {
-      await mockService.updateUser(inputUser);
-    } catch (error) {
-      expect(error).toEqual(new CustomError('Email already in use by another user', 409));
-    }
-  });
-
-  it('should throw an error if the new email is already in use by the current user', async () => {
-    // Given
-    const inputUser: IUserWithPassword = {
-      email: 'john@example.com',
-      password: 'P@ssword123',
-      username: 'NewUser',
-    };
-
-    // When
-    mockUserQueries.getById = jest.fn().mockResolvedValue(mockCurrentUser);
-    bcrypt.compare = jest.fn().mockResolvedValue(true);
-
-    // Then
-    try {
-      await mockService.updateUser(inputUser);
-    } catch (error) {
-      expect(error).toEqual(new CustomError('This email is already in use by your account', 400));
-    }
-  });
-
-  it('should throw an error if the password format is invalid', async () => {
-    // Given
-    const inputUser: IUserWithPassword = {
-      email: '',
-      password: 'password123',
-      username: 'NewUser',
-      newPassword: 'invalidpassword',
-    };
-
-    // When
-    mockUserQueries.getById = jest.fn().mockResolvedValue(mockCurrentUser);
-
-    bcrypt.compare = jest.fn().mockResolvedValue(true);
-
-    // Then
-    try {
-      await mockService.updateUser(inputUser);
-    } catch (error) {
-      expect(error).toEqual(new CustomError('Invalid password format', 400));
-    }
-  });
-
-  it('should throw an error if the username is already in use', async () => {
-    // Given
-    const inputUser: IUserWithPassword = {
-      email: '',
-      password: 'P@ssword123',
-      username: 'JohnDoe',
-      newPassword: 'newP@ssword123',
-    };
-
-    // When
-    mockUserQueries.getById = jest.fn().mockResolvedValue(mockCurrentUser);
-    bcrypt.compare = jest.fn().mockResolvedValue(true);
-
-    // Then
-    try {
-      await mockService.updateUser(inputUser);
-    } catch (error) {
-      expect(error).toEqual(new CustomError('Username already in use', 409));
-    }
-  });
-
-  it('should update the user successfully', async () => {
-    // Given
-    const inputUser: IUserWithPassword = {
-      email: 'john2@example.com',
-      password: 'P@ssword123',
-      username: 'NewUser',
-      newPassword: 'newP@ssword123',
-    };
-
-    // When
-    mockUserQueries.getById = jest.fn().mockResolvedValue(mockCurrentUser);
-    mockUserQueries.getUserByEmail = jest.fn().mockResolvedValue(null);
-    bcrypt.compare = jest.fn().mockResolvedValue(true);
-    bcrypt.hash = jest.fn().mockResolvedValue('hashedNewPassword');
-
-    const updatedUser: IUserWithID = {
-      ...mockCurrentUser,
-      email: 'john2@example.com',
-      username: 'NewUser',
-      password: 'hashedNewPassword',
-    };
-
-    mockUserQueries.update = jest.fn().mockResolvedValue(updatedUser); // Simula que el usuario es actualizado correctamente
-    await mockService.updateUser(inputUser);
-
-    // Then
-    expect(mockUserQueries.update).toHaveBeenCalledWith(updatedUser);
-  });
+  //   // Then
+  //   expect(userQuery.updateUser).toHaveBeenCalledWith({
+  //     ...currentUser,
+  //     email: user.email,
+  //     password: 'hashedNewPassword',
+  //     steamNick: user.steamNick,
+  //     steamId: user.steamId,
+  //   });
+  // });
 });

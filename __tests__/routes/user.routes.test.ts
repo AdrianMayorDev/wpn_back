@@ -1,6 +1,7 @@
 import * as userController from '@/controllers/userController';
 import * as authMiddle from '@/middlewares/authMiddleware';
 import { app } from '@/server';
+
 import request from 'supertest';
 
 jest.mock('@/controllers/userController', () => ({
