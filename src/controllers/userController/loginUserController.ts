@@ -8,12 +8,16 @@ const loginUserController = async (req: Request, res: Response, next: NextFuncti
   try {
     const { email, password }: Record<string, string> = req.body;
 
+    // Validating input
     if (typeof email !== 'string' || typeof password !== 'string') {
       throw new CustomError('Invalid input', 400);
     }
 
+    const credentials = { email, password };
     const service = new UserService();
-    const response = await service.loginUser({ email, password });
+
+    // Logging in user
+    const response = await service.loginUser(credentials);
 
     logger.info(`User logged in: ${email}`);
     res.status(200).json(createResponse('success', 'Login successful', response));

@@ -8,6 +8,8 @@ dotenv.config();
 const port = process.env.SERVER_PORT ?? 3005;
 
 export const app: Express = express();
+
+// Middleware to parse incoming JSON requests
 app.use(express.json());
 
 // Listen Middleware

@@ -7,14 +7,13 @@ export abstract class BaseQuery<T> {
   protected abstract table: string;
   protected abstract id: number | null;
 
-  async insert(data: Partial<T>): Promise<T> {
+  protected async insert(data: Partial<T>): Promise<T> {
     const connection = await getConnection();
+    const keys = Object.keys(data).join(', ');
+    const values = Object.values(data);
+    const placeholders = values.map(() => '?').join(', ');
+    const query = `INSERT INTO ${this.table} (${keys}) VALUES (${placeholders})`;
     try {
-      const keys = Object.keys(data).join(', ');
-      const values = Object.values(data);
-      const placeholders = values.map(() => '?').join(', ');
-
-      const query = `INSERT INTO ${this.table} (${keys}) VALUES (${placeholders})`;
       const [result] = await connection.execute<ResultSetHeader>(query, values);
 
       return { id: result.insertId, ...data } as T;
@@ -25,7 +24,7 @@ export abstract class BaseQuery<T> {
     }
   }
 
-  async update(data: Partial<T>): Promise<T> {
+  protected async update(data: Partial<T>): Promise<T> {
     const connection = await getConnection();
     try {
       const keys = Object.keys(data)
@@ -44,7 +43,7 @@ export abstract class BaseQuery<T> {
     }
   }
 
-  async delete(): Promise<void> {
+  protected async delete(): Promise<void> {
     const connection = await getConnection();
     try {
       await connection.execute(`DELETE FROM ${this.table} WHERE id = ?`, [this.id]);
@@ -55,7 +54,7 @@ export abstract class BaseQuery<T> {
     }
   }
 
-  async getById(selectKeys: string[]): Promise<T | null> {
+  protected async getById(selectKeys: string[]): Promise<T | null> {
     const connection = await getConnection();
     try {
       const select = selectKeys.join(', ');
@@ -74,7 +73,7 @@ export abstract class BaseQuery<T> {
     }
   }
 
-  async getByField(selectFields: string[], field: string, value: string): Promise<T | null> {
+  protected async getByField(selectFields: string[], field: string, value: string): Promise<T | null> {
     const connection = await getConnection();
     try {
       const select = selectFields.join(', ');
