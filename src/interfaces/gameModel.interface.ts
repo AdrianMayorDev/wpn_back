@@ -120,18 +120,18 @@ const fieldMapping: Record<string, GameFields> = {
   updatedAt: GameFields.UPDATED_AT,
 };
 
-function mapGamesToDbFields(data: IGameData): IGameDataDB {
-  const mappedData: any = {};
+const mapGamesToDbFields = (data: IGameData): IGameDataDB => {
+  const mappedData: any = {} as IGameDataDB;
   for (const key in data) {
     if (fieldMapping[key]) {
       mappedData[fieldMapping[key]] = data[key as keyof IGameData];
     }
   }
   return mappedData;
-}
+};
 
-function mapGamesToModel(data: IGameDataDB): IGameData {
-  const mappedData: any = {};
+const mapGamesToModel = (data: IGameDataDB): IGameData => {
+  const mappedData: any = {} as IGameDataDB;
   for (const key in data) {
     const modelKey = Object.keys(fieldMapping).find((k) => fieldMapping[k] === key);
     if (modelKey) {
@@ -139,7 +139,7 @@ function mapGamesToModel(data: IGameDataDB): IGameData {
     }
   }
   return mappedData;
-}
+};
 
 interface IMetacriticData {
   metacriticId: number;

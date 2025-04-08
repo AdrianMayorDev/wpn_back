@@ -35,11 +35,11 @@ class GamesModelDTO extends BaseQuery<IGameData, IGameDataDB> {
       return null;
     }
 
-    logger.info(`Game found: ${game.gameTitle}`);
+    logger.info(`Game found: ${game[0].gameTitle}`);
     console.info(game);
 
     if (!game) return null;
-    return game;
+    return game[0];
   }
 
   async createNewGame({ game }: { game: IGameData }): Promise<Partial<IGameData>> {

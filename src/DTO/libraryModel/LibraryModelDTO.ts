@@ -56,6 +56,37 @@ class LibraryModelDTO extends BaseQuery<ILibraryData, ILibraryDataDB> {
 
     await this.insert(libraryData);
   }
+
+  async updateGameInLibrary(userId: string, gameId: string, data: Partial<ILibraryData>) {
+    logger.info(`Updating game in library: ${gameId} for user: ${userId}`);
+    await this.update({
+      keyField: this.fields.GAME_ID,
+      data: { ...data, userId, gameId },
+      value: gameId,
+    });
+  }
+
+  async deleteGameFromLibrary(userId: string, gameId: string) {
+    logger.info(`Deleting game from library: ${gameId} for user: ${userId}`);
+    await this.delete({
+      keyField: this.fields.GAME_ID,
+      value: gameId,
+    });
+  }
+
+  async getUserLibrary(userId: string) {
+    const fieldsToSelect = [
+      this.fields.USER_ID,
+      this.fields.GAME_ID,
+      this.fields.STATUS_ID,
+      this.fields.ADDED_AT,
+      this.fields.UPDATED_AT,
+      this.fields.MANUAL_INDEX,
+    ];
+    const keyField = this.fields.USER_ID;
+    const userLibrary = await this.getByField({ fieldsToSelect, keyField, value: userId });
+    return userLibrary;
+  }
 }
 
 export default LibraryModelDTO;
