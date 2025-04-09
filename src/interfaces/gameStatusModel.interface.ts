@@ -8,13 +8,13 @@ enum GameStatusFields {
 }
 
 interface IGameStatusData {
-  gameStatusId?: number;
+  gameStatusId?: string;
   name: string;
   userId: string;
 }
 
 interface IGameStatusDataDB {
-  [GameStatusFields.GAME_STATUS_ID]: number;
+  [GameStatusFields.GAME_STATUS_ID]: string;
   [GameStatusFields.NAME]: string;
   [GameStatusFields.USER_ID]: string;
   [GameStatusFields.CREATED_AT]: Date;
@@ -22,7 +22,7 @@ interface IGameStatusDataDB {
 }
 
 interface IGameStatusDataWithID extends Omit<IGameStatusData, 'gameStatusId' | 'name'> {
-  gameStatusId: number;
+  gameStatusId: string;
   name?: string;
 }
 

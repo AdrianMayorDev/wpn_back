@@ -22,9 +22,9 @@ class ScrappingService {
     }
 
     const browser = await launch({
-      headless: false, // Cambiar a true para producción
-      args: ['--no-sandbox', '--disable-setuid-sandbox'], // Opciones para evitar problemas en headless
-      defaultViewport: { width: 1280, height: 800 }, // Configurar viewport explícito
+      headless: false,
+      args: ['--no-sandbox', '--disable-setuid-sandbox'],
+      defaultViewport: { width: 1280, height: 800 },
     });
     const page = await browser.newPage();
 
@@ -38,24 +38,18 @@ class ScrappingService {
         const url = response.url();
         if (url.includes('https://howlongtobeat.com/api/ouch/')) {
           logger.info('Captured API URL:', url);
-          this.apiUrl = url; // Guardar la URL capturada
+          this.apiUrl = url;
         }
       });
 
-      // Navegar al dominio base
       await page.goto('https://howlongtobeat.com', { waitUntil: 'domcontentloaded' });
 
-      // Hacer clic en el cuadro de búsqueda para activar la llamada
       await page.waitForSelector('.MainNavigation_search_box__UUnYc');
       await page.click('.MainNavigation_search_box__UUnYc');
 
-      // Esperar específicamente la respuesta de la API
-      await page.waitForResponse(
-        (response) => response.url().includes('https://howlongtobeat.com/api/ouch/'),
-        { timeout: 10000 } // Tiempo máximo de espera
-      );
-      // Esperar un tiempo para capturar la llamada
-      // await page.waitForTimeout(5000);
+      await page.waitForResponse((response) => response.url().includes('https://howlongtobeat.com/api/ouch/'), {
+        timeout: 1000,
+      });
 
       if (!this.apiUrl) {
         throw new Error('API URL not captured');
@@ -68,7 +62,7 @@ class ScrappingService {
     }
   }
 
-  async scrapMetacritc(gameTitle: string): Promise<IMetacriticData> {
+  async scrapMetacritic(gameTitle: string): Promise<IMetacriticData> {
     gameTitle = this.validateGameTitle(gameTitle);
     const queryGetMetacriticGame = `https://backend.metacritic.com/finder/metacritic/autosuggest/${gameTitle}`;
 
@@ -90,15 +84,15 @@ class ScrappingService {
     const browser = await launch({ headless: true });
     const page = await browser.newPage();
 
-    // Simular un navegador real
+    // Simulate a user agent to avoid bot detection
     await page.setUserAgent(
       'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36'
     );
 
-    // Navitage to the URL
+    // Navigate to the URL
     await page.goto(url, { waitUntil: 'domcontentloaded' });
 
-    // Extraer datos con selectores CSS
+    // Extract data from the page
     const data = await page.evaluate(() => {
       const userScore =
         document.querySelector(".c-productScoreInfo_scoreContent [title*='User score'].c-siteReviewScore span")
@@ -109,7 +103,7 @@ class ScrappingService {
       };
     });
 
-    // Cerrar navegador
+    // Close the browser
     await browser.close();
 
     const gameGenres = gameItem.genres?.map((genre: { name: string }) => genre.name);
@@ -131,6 +125,11 @@ class ScrappingService {
   }
 
   async scrapHowLongToBeat(gameTitle: string): Promise<IHowLongToBeatData> {
+    const logsDir = path.join(__dirname, '../../../logs');
+    if (!fs.existsSync(logsDir)) {
+      fs.mkdirSync(logsDir, { recursive: true });
+    }
+
     gameTitle = this.validateGameTitle(gameTitle);
     const payload = {
       searchType: 'games',
@@ -210,21 +209,19 @@ class ScrappingService {
         const titleToCompare = item.game_name
           .toLowerCase()
           .replace(/&/g, 'and')
-          .replace(/[^a-zA-Z0-9]/g, ''); // Eliminar caracteres especiales y espacios
+          .replace(/[^a-zA-Z0-9]/g, '');
 
-        // Normalizar el alias del juego en la API (game_alias)
         const aliasToCompare = item.game_alias
           ? item.game_alias
               .toLowerCase()
               .replace(/&/g, 'and')
               .replace(/[^a-zA-Z0-9]/g, '')
-          : null; // Eliminar caracteres especiales y espacios si existe alias
+          : null;
 
-        // Normalizar el título del juego proporcionado
         const normalizedGameTitle = gameTitle
           .toLowerCase()
           .replace(/&/g, 'and')
-          .replace(/[^a-zA-Z0-9]/g, ''); // Eliminar caracteres especiales y espacios
+          .replace(/[^a-zA-Z0-9]/g, '');
 
         logger.info('comparing titleToCompare', titleToCompare);
         logger.info('comparing aliasToCompare', aliasToCompare);
@@ -236,7 +233,7 @@ class ScrappingService {
             logger.info('Assuming match due to single-character difference');
             return true;
           } else {
-            const logFilePath = path.join(__dirname, 'mismatched_titles.log');
+            const logFilePath = path.join(logsDir, 'mismatched_titles.log');
             const logEntry = `Possible mismatch:\nGame Item: ${JSON.stringify(item)}\nProvided Title: ${gameTitle}\nNormalized Title: ${normalizedGameTitle}\nTitle to Compare: ${titleToCompare}\n\n`;
 
             fs.appendFileSync(logFilePath, logEntry, 'utf8');
@@ -245,7 +242,6 @@ class ScrappingService {
           }
         }
 
-        // Comparar las cadenas normalizadas
         return titleToCompare === normalizedGameTitle || aliasToCompare === normalizedGameTitle;
       }
     );
@@ -254,7 +250,7 @@ class ScrappingService {
     logger.info('gameItem', gameItem);
 
     if (!gameItem) {
-      const logFilePath = path.join(__dirname, 'unmatched_titles.log');
+      const logFilePath = path.join(logsDir, 'unmatched_titles.log');
       const logEntry = `Unmatched Title:\nProvided Title: ${gameTitle}\nNormalized Title: ${gameTitle
         .toLowerCase()
         .replace(/&/g, 'and')
@@ -263,7 +259,6 @@ class ScrappingService {
       fs.appendFileSync(logFilePath, logEntry, 'utf8');
       logger.warn(`Logged unmatched title to ${logFilePath}`);
 
-      // Devolver un objeto vacío o predeterminado
       return {
         howLongToBeatId: 0,
         title: gameTitle,
@@ -293,79 +288,6 @@ class ScrappingService {
 
     return data;
   }
-
-  // async scrapHowLongToBeat(gameTitle: string): Promise<IHowLongToBeatData> {
-  //   if (!this.apiUrl) {
-  //     throw new Error('API URL is not defined. Ensure captureApiUrlOnce() is called first.');
-  //   }
-
-  //   gameTitle = this.validateGameTitle(gameTitle);
-
-  //   const payload = {
-  //     searchType: 'games',
-  //     searchTerms: gameTitle.split(' '),
-  //     searchPage: 1,
-  //     size: 20,
-  //     searchOptions: {
-  //       games: {
-  //         userId: 0,
-  //         platform: '',
-  //         sortCategory: 'popular',
-  //         rangeCategory: 'main',
-  //         rangeTime: { min: null, max: null },
-  //         gameplay: { perspective: '', flow: '', genre: '', difficulty: '' },
-  //         rangeYear: { min: '', max: '' },
-  //         modifier: '',
-  //       },
-  //       users: { sortCategory: 'postcount' },
-  //       lists: { sortCategory: 'follows' },
-  //       filter: '',
-  //       sort: 0,
-  //       randomizer: 0,
-  //     },
-  //     useCache: true,
-  //   };
-  //   logger.info('this.apiUrl', this.apiUrl);
-  //   const response = await fetch(this.apiUrl, {
-  //     method: 'POST',
-  //     headers: {
-  //       'Content-Type': 'application/json',
-  //       'User-Agent':
-  //         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36',
-  //       Accept: '*/*',
-  //       'Accept-Encoding': 'gzip, deflate, br, zstd',
-  //       'Accept-Language': 'en-US,en;q=0.6',
-  //       Origin: 'https://howlongtobeat.com',
-  //       Referer: 'https://howlongtobeat.com',
-  //     },
-  //     body: JSON.stringify(payload),
-  //   });
-
-  //   const dataTest = await response.json();
-  //   const gamesResults = dataTest.data;
-
-  //   const gameItem = gamesResults.find((item: { game_type: string; game_name: string; game_id: string }) => {
-  //     const titleToCompare = item.game_name.toLowerCase().replace(/[^a-zA-Z0-9 ]/g, '');
-  //     return item.game_type === 'game' && titleToCompare === gameTitle.toLowerCase();
-  //   });
-
-  //   if (!gameItem) {
-  //     throw new Error('Game not found in API response');
-  //   }
-
-  //   return {
-  //     howLongToBeatId: gameItem.game_id,
-  //     title: gameItem.game_name,
-  //     mainStory: gameItem.comp_main,
-  //     mainExtra: gameItem.comp_plus,
-  //     completionist: gameItem.comp_100,
-  //     combined: gameItem.comp_all,
-  //     isSinglePlayer: gameItem.comp_lvl_sp,
-  //     isCoop: gameItem.comp_lvl_co,
-  //     isMulti: gameItem.comp_lvl_mp,
-  //     howLongToBeatReview: gameItem.review_score,
-  //   };
-  // }
 }
 
 export default ScrappingService;

@@ -4,11 +4,11 @@ import {
   mapGameStatusToDbFields,
   mapGameStatusToModel,
 } from '@/interfaces/gameStatusModel.interface';
-import { BaseQuery } from '../base/baseQuery';
+import BaseQuery from '../base/baseQuery';
 import { logger } from '@/utils/logger';
 
 interface IGameStatusData {
-  gameStatusId?: number;
+  gameStatusId?: string;
   name: string;
   userId: string;
 }
@@ -33,17 +33,17 @@ class GameStatusModelDTO extends BaseQuery<IGameStatusData, IGameStatusDataDB> {
     return response;
   }
 
-  async updateGameStatus(gameStatusId: number, data: Partial<IGameStatusData>): Promise<void> {
+  async updateGameStatus(gameStatusId: string, data: Partial<IGameStatusData>): Promise<void> {
     logger.info(`Updating game status: ${gameStatusId}`);
     await this.update({ keyField: this.fields.GAME_STATUS_ID, data: { ...data, gameStatusId }, value: gameStatusId });
   }
 
-  async deleteGameStatus(gameStatusId: number): Promise<void> {
+  async deleteGameStatus(gameStatusId: string): Promise<void> {
     logger.info(`Deleting game status: ${gameStatusId}`);
     await this.delete({ keyField: this.fields.GAME_STATUS_ID, value: gameStatusId.toString() });
   }
 
-  async getGameStatusById(gameStatusId: number): Promise<IGameStatusData | null> {
+  async getGameStatusById(gameStatusId: string): Promise<IGameStatusData | null> {
     const gameStatus = await this.getByField({
       fieldsToSelect: [this.fields.GAME_STATUS_ID, this.fields.NAME, this.fields.USER_ID],
       keyField: this.fields.GAME_STATUS_ID,

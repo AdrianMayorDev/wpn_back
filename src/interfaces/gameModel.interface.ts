@@ -1,3 +1,5 @@
+import { logger } from '@/utils/logger';
+
 enum GameFields {
   ALL = '*',
   GAME_ID = 'game_id',
@@ -97,14 +99,14 @@ const fieldMapping: Record<string, GameFields> = {
   gameGenres: GameFields.GAME_GENRES,
   gamePlatforms: GameFields.GAME_PLATFORMS,
   metacriticGameId: GameFields.METACRITIC_GAME_ID,
-  howlongtobeatGameId: GameFields.HOW_LONG_TO_BEAT_GAME_ID,
+  howLongToBeatGameId: GameFields.HOW_LONG_TO_BEAT_GAME_ID,
   mainStoryTime: GameFields.MAIN_STORY_TIME,
   mainPlusExtrasTime: GameFields.MAIN_PLUS_EXTRAS_TIME,
   completionistTime: GameFields.COMPLETIONIST_TIME,
   combinedTime: GameFields.COMBINED_TIME,
   metacriticScore: GameFields.METACRITIC_SCORE,
   usersScore: GameFields.USERS_SCORE,
-  howlongtobeatReviewScore: GameFields.HOW_LONG_TO_BEAT_REVIEW_SCORE,
+  howLongToBeatReviewScore: GameFields.HOW_LONG_TO_BEAT_REVIEW_SCORE,
   ratioUsersMainStory: GameFields.RATIO_USERS_MAIN_STORY,
   ratioUsersMainExtra: GameFields.RATIO_USERS_MAIN_EXTRA,
   ratioUsersCompletionist: GameFields.RATIO_USERS_COMPLETIONIST,
@@ -125,6 +127,8 @@ const mapGamesToDbFields = (data: IGameData): IGameDataDB => {
   for (const key in data) {
     if (fieldMapping[key]) {
       mappedData[fieldMapping[key]] = data[key as keyof IGameData];
+    } else {
+      logger.error(`Key ${key} not found in fieldMapping`);
     }
   }
   return mappedData;
@@ -136,6 +140,8 @@ const mapGamesToModel = (data: IGameDataDB): IGameData => {
     const modelKey = Object.keys(fieldMapping).find((k) => fieldMapping[k] === key);
     if (modelKey) {
       mappedData[modelKey] = data[key as keyof IGameDataDB];
+    } else {
+      logger.error(`Key ${key} not found in fieldMapping`);
     }
   }
   return mappedData;
@@ -177,10 +183,46 @@ interface ISteamGameData {
   playtimeDisconnected: number;
 }
 
+interface IHowLongToBeatRaw {
+  game_id: number;
+  game_name: string;
+  game_name_date: number;
+  game_alias?: string;
+  game_type: string;
+  game_image: string;
+  comp_lvl_combine: number;
+  comp_lvl_sp: boolean;
+  comp_lvl_co: boolean;
+  comp_lvl_mp: boolean;
+  comp_main: number;
+  comp_plus: number;
+  comp_100: number;
+  comp_all: number;
+  comp_main_count: number;
+  comp_plus_count: number;
+  comp_100_count: number;
+  comp_all_count: number;
+  invested_co: number;
+  invested_mp: number;
+  invested_co_count: number;
+  invested_mp_count: number;
+  count_comp: number;
+  count_speedrun: number;
+  count_backlog: number;
+  count_review: number;
+  review_score: number;
+  count_playing: number;
+  count_retired: number;
+  profile_platform: string;
+  profile_popular: number;
+  release_world: number;
+}
+
 export {
   IGameData,
   IMetacriticData,
   ISteamGameData,
+  IHowLongToBeatRaw,
   IHowLongToBeatData,
   GameFields,
   IGameDataDB,

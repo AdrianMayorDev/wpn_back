@@ -5,7 +5,7 @@ import {
   mapGamesToDbFields,
   mapGamesToModel,
 } from '@/interfaces/gameModel.interface';
-import { BaseQuery } from '../base/baseQuery';
+import BaseQuery from '../base/baseQuery';
 import { logger } from '@/utils/logger';
 
 class GamesModelDTO extends BaseQuery<IGameData, IGameDataDB> {
@@ -55,6 +55,28 @@ class GamesModelDTO extends BaseQuery<IGameData, IGameDataDB> {
     const response = await this.insertMany(games);
     logger.info(`Games to create: ${JSON.stringify(games)}`);
     return response;
+  }
+
+  async getGame({
+    gameId,
+    fieldsToSelect = [this.fields.ALL],
+  }: {
+    gameId: string;
+    fieldsToSelect?: GameFields[];
+  }): Promise<IGameData | null> {
+    const keyField = this.fields.GAME_ID;
+    const value = gameId;
+    const game = await this.getByField({ fieldsToSelect, keyField, value });
+
+    if (!game) {
+      return null;
+    }
+
+    logger.info(`Game found: ${game[0].gameTitle}`);
+    console.info(game);
+
+    if (!game) return null;
+    return game[0];
   }
 }
 

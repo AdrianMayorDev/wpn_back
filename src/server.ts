@@ -26,4 +26,9 @@ app.get('/test', (_req, res) => {
 // Error Middleware
 app.use(errorMiddleware);
 
+// 404 Middleware
+app.use((req, res, _next) => {
+  res.status(404).json({ message: 'Not Found' });
+});
+
 export { app };

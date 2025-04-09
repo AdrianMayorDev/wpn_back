@@ -10,7 +10,8 @@ import deleteGameStatusService from './libraryService/deleteGameStatusService';
 import getUserLibraryService from './libraryService/getUserLibraryService';
 import assignGameStatusService from './libraryService/assignGamesService';
 import removeGameFromLibraryService from './libraryService/removeFromLibraryService';
-
+import getGameService from './libraryService/getGameService';
+import getGameStatusService from './libraryService/getGameStatusService';
 class LibraryService {
   private readonly scrapingService = new ScrapingService();
   private readonly gamesModel = new GamesModel();
@@ -21,9 +22,11 @@ class LibraryService {
   private readonly createGameStatusService = createGameStatusService;
   private readonly updateGameStatusService = updateGameStatusService;
   private readonly deleteGameStatusService = deleteGameStatusService;
+  private readonly getGameService = getGameService;
   private readonly getUserLibraryService = getUserLibraryService;
   private readonly assignGameStatusService = assignGameStatusService;
   private readonly removeGameFromLibraryService = removeGameFromLibraryService;
+  private readonly getGameStatusService = getGameStatusService;
 
   async syncLibrary({
     userId,
@@ -48,14 +51,19 @@ class LibraryService {
     return await this.createGameStatusService(this.gameStatusModel, userId, name);
   }
 
-  async updateGameStatus(userId: string, gameStatusId: number, name: string) {
+  async updateGameStatus(userId: string, gameStatusId: string, name: string) {
     const gameStatusData = { userId, gameStatusId, name };
     await this.updateGameStatusService(this.gameStatusModel, gameStatusData);
   }
 
-  async deleteGameStatus(userId: string, gameStatusId: number) {
+  async deleteGameStatus(userId: string, gameStatusId: string) {
     const gameStatusData = { userId, gameStatusId };
     await this.deleteGameStatusService(this.gameStatusModel, gameStatusData);
+  }
+
+  async getGame(gameId: string) {
+    const game = await this.getGameService(this.gamesModel, gameId);
+    return game;
   }
 
   async assignGameStatusToGame(userId: string, gameId: string, gameStatusId: number) {
@@ -68,6 +76,11 @@ class LibraryService {
 
   async getUserLibrary(userId: string) {
     return await this.getUserLibraryService(this.libraryModel, userId);
+  }
+
+  async getGameStatus(userId: string, gameId: string) {
+    const gameStatus = await this.getGameStatusService(this.gameStatusModel, userId, gameId);
+    return gameStatus;
   }
 }
 

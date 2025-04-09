@@ -103,13 +103,12 @@ const syncLibraryService = async ({
     const gameHeaderUrl = `https://steamcdn-a.akamaihd.net/steam/apps/${game.appid}/header.jpg`;
 
     try {
-      const metacriticData = await scrapingService.scrapMetacritc(game.name);
+      logger.info(`Creating game: ${game.name} (appid: ${game.appid})`);
+
+      const metacriticData = await scrapingService.scrapMetacritic(game.name);
       const HLTBData = await scrapingService.scrapHowLongToBeat(game.name);
 
       logger.info(`Game data fetched`);
-
-      // logger.info(`Metacritic data: ${JSON.stringify(metacriticData)}`);
-      logger.info(`HowLongToBeat data: ${JSON.stringify(HLTBData)}`);
 
       const gameData: IGameData = {
         gameId: uuidv4(),
@@ -140,7 +139,7 @@ const syncLibraryService = async ({
         gameIsCoop: HLTBData.isCoop,
         gameIsSinglePlayer: HLTBData.isSinglePlayer,
       };
-
+      logger.debug(`Game data howLongToBeatGameId: ${HLTBData.howLongToBeatId}`);
       await gamesModel.createNewGame({ game: gameData });
       logger.info(`Game created: ${gameData.gameTitle}`);
 

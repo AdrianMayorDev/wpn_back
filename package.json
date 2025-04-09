@@ -10,15 +10,16 @@
   },
   "name": "wpn_back",
   "description": "",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "main": "dist/server.js",
   "scripts": {
     "prepare": "husky && husky install",
     "build": "npx tsc --project tsconfig.build.json && tsc-alias -p tsconfig.json",
-    "start": "node dist/server.js",
-    "dev": "NODE_ENV=development nodemon -r tsconfig-paths/register src/server.ts",
-    "dev:no-test": "NODE_ENV=development_no_test  nodemon -r tsconfig-paths/register src/server.ts --ignore '**/*.test.ts'",
-    "test": "NODE_ENV=test npx jest --coverage"
+    "start": "LOG_LEVEL=info node dist/server.js",
+    "dev": "LOG_LEVEL=debug NODE_ENV=development nodemon -r tsconfig-paths/register src/server.ts",
+    "dev:no-test": "LOG_LEVEL=debug NODE_ENV=development_no_test nodemon -r tsconfig-paths/register src/server.ts --ignore '**/*.test.ts'",
+    "dev:debug": "LOG_LEVEL=debug DEBUG_MODE=true NODE_ENV=development nodemon -r tsconfig-paths/register src/server.ts",
+    "test": "LOG_LEVEL=info NODE_ENV=test npx jest --coverage"
   },
   "keywords": [],
   "author": "",

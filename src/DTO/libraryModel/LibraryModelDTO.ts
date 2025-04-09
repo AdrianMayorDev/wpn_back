@@ -6,7 +6,7 @@ import {
   mapLibraryToModel,
 } from '@/interfaces/libraryModel.interface';
 import { logger } from '@/utils/logger';
-import { BaseQuery } from '../base/baseQuery';
+import BaseQuery from '../base/baseQuery';
 
 class LibraryModelDTO extends BaseQuery<ILibraryData, ILibraryDataDB> {
   protected table = 'library';
@@ -86,6 +86,20 @@ class LibraryModelDTO extends BaseQuery<ILibraryData, ILibraryDataDB> {
     const keyField = this.fields.USER_ID;
     const userLibrary = await this.getByField({ fieldsToSelect, keyField, value: userId });
     return userLibrary;
+  }
+
+  async getGameStatus({ gameId }: { gameId: string }) {
+    const fieldsToSelect = [this.fields.STATUS_ID];
+    const keyFields = [this.fields.USER_ID, this.fields.GAME_ID];
+    const values = [gameId];
+    const gameStatus = await this.getByManyFields({ fieldsToSelect, keyFields, values });
+
+    if (!gameStatus) return null;
+
+    logger.info(`Game status found in library: `, gameStatus);
+    console.info(gameStatus);
+
+    return gameStatus;
   }
 }
 
