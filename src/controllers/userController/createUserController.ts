@@ -6,14 +6,18 @@ import { NextFunction, Request, Response } from 'express';
 
 const createUserController = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { username, email, password }: Record<string, string> = req.body;
+    const { steamNick, steamId, email, password }: Record<string, string> = req.body;
 
+    // Check if the input is valid
     if (typeof email !== 'string' || typeof password !== 'string') {
       throw new CustomError('Invalid input', 400);
     }
 
+    const userData = { email, password, steamNick, steamId };
     const service = new UserService();
-    const response = await service.registerUser({ username, email, password });
+
+    // Register user
+    const response = await service.registerUser(userData);
 
     logger.info(`User created: ${response.email}`);
     res.status(201).json(createResponse('success', 'User created', response));

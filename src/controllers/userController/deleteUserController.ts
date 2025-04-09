@@ -9,19 +9,24 @@ const deleteUserController = async (req: Request, res: Response, next: NextFunct
     const { password }: Record<string, string> = req.body;
     const id = Number(req.user?.id);
 
+    // Check if the user is authenticated
     if (!req.user) {
       throw new CustomError('Unauthorized', 401);
     }
 
+    // Validating user id
     if (isNaN(id)) {
       throw new CustomError('Invalid id field', 400);
     }
 
+    // Validating password field
     if (!password) {
       throw new CustomError('Password field is required', 400);
     }
 
     const service = new UserService(id);
+
+    // Deleting user
     const result = await service.deleteUser(password);
 
     logger.info(`User with id ${id} deleted`);

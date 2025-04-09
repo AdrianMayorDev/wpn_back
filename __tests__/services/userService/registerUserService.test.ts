@@ -1,190 +1,89 @@
-import { IUserWithPassword } from '@/interfaces/user.interface';
-import { User } from '@/orm/users/Users';
-import UserService from '@/services/userService';
+import { IUserWithPassword } from '@/interfaces/userModel.interface';
+import { UserModel } from '@/orm/users/UsersModel';
+import registerUserService from '@/services/userService/regsiterUserService';
 import { CustomError } from '@/utils/CustomError';
+import { isValidEmail, isValidPassword } from '@/utils/userValidations';
 import bcrypt from 'bcryptjs';
 
-jest.mock('@/orm/users/Users');
-jest.mock('bcryptjs', () => ({
-  hash: jest.fn().mockImplementation(() => 'hashedPassword'),
-}));
+jest.mock('@/orm/users/UsersModel');
+jest.mock('@/utils/userValidations');
+jest.mock('bcryptjs');
 
-describe('User service register user', () => {
-  let mockService: UserService;
-  let mockUserQueries: Partial<User>;
+describe('registerUserService', () => {
+  let userQuery: jest.Mocked<UserModel>;
+  let user: IUserWithPassword;
 
   beforeEach(() => {
-    jest.resetAllMocks();
-
-    mockUserQueries = {
-      getUserByEmail: jest.fn(),
-      insert: jest.fn(),
+    userQuery = new UserModel() as jest.Mocked<UserModel>;
+    user = {
+      email: 'test@example.com',
+      password: 'P@ssw0rd',
+      steamNick: 'testNick',
+      steamId: '123456789',
     };
-
-    (User as jest.Mock).mockImplementation(() => mockUserQueries);
-
-    mockService = new UserService();
-  });
-
-  it('should register a user successfully', async () => {
-    const resultUserQuery: IUserWithPassword = {
-      username: 'John Doe',
-      email: 'john@example.com',
-      password: 'hashedPassword',
-    };
-
-    // Given
-    const inputUser: IUserWithPassword = {
-      username: 'John Doe',
-      email: 'john@example.com',
-      password: 'P@ssword123',
-    };
-
-    const inputUserHashed: IUserWithPassword = {
-      ...inputUser,
-      password: 'hashedPassword',
-    };
-
-    // When
-    mockUserQueries.getUserByEmail = jest.fn().mockResolvedValue(null);
-    (jest.spyOn(bcrypt, 'hash') as jest.Mock).mockResolvedValue(inputUserHashed.password);
-    mockUserQueries.insert = jest
-      .fn()
-      .mockImplementation(async (resultUserQuery) => await Promise.resolve(resultUserQuery));
-
-    // Then
-    const result = await mockService.registerUser(inputUser);
-
-    expect(mockUserQueries.getUserByEmail).toHaveBeenCalledWith(inputUser.email);
-    expect(bcrypt.hash).toHaveBeenCalledWith(inputUser.password, 10);
-    expect(mockUserQueries.insert).toHaveBeenCalledWith(inputUserHashed);
-    expect(result).toEqual(resultUserQuery);
   });
 
   it('should throw an error if user already exists', async () => {
-    const expectedResponse = new CustomError('User already exists', 409);
     // Given
-    const inputUser: IUserWithPassword = {
-      username: 'John Doe',
-      email: 'john Doe',
-      password: 'P@ssword123',
-    };
+    userQuery.getUserByEmail.mockResolvedValue({ ...user, id: 1 });
 
     // When
-    mockUserQueries.getUserByEmail = jest.fn().mockResolvedValue(inputUser);
+    const result = registerUserService(userQuery, user);
 
     // Then
-    try {
-      await mockService.registerUser(inputUser);
-    } catch (error) {
-      expect(error).toEqual(expectedResponse);
-    }
-
-    expect(mockUserQueries.getUserByEmail).toHaveBeenCalledWith(inputUser.email);
-    expect(bcrypt.hash).not.toHaveBeenCalled();
-    expect(mockUserQueries.insert).not.toHaveBeenCalled();
+    await expect(result).rejects.toThrow(new CustomError('User already exists', 409));
   });
 
-  it('should throw an error if email is invalid', async () => {
-    const expectedResponse = new CustomError('Invalid email format', 400);
+  it('should throw an error if email format is invalid', async () => {
     // Given
-    const inputUser: IUserWithPassword = {
-      username: 'John Doe',
-      email: 'john Doe',
-      password: 'P@ssword123',
-    };
+    userQuery.getUserByEmail.mockResolvedValue(null);
+    (isValidEmail as jest.Mock).mockReturnValue(false);
 
     // When
-    mockUserQueries.getUserByEmail = jest.fn().mockResolvedValue(null);
+    const result = registerUserService(userQuery, user);
 
     // Then
-    try {
-      await mockService.registerUser(inputUser);
-    } catch (error) {
-      expect(error).toEqual(expectedResponse);
-    }
-
-    expect(mockUserQueries.getUserByEmail).toHaveBeenCalledWith(inputUser.email);
-    expect(bcrypt.hash).not.toHaveBeenCalled();
-    expect(mockUserQueries.insert).not.toHaveBeenCalled();
+    await expect(result).rejects.toThrow(new CustomError('Invalid email format', 400));
   });
 
-  it('should throw an error if password is invalid', async () => {
-    const expectedResponse = new CustomError('Invalid password format', 400);
+  it('should throw an error if Steam Nick or Steam ID is missing', async () => {
     // Given
-    const inputUser: IUserWithPassword = {
-      username: 'John Doe',
-      email: 'john@example.com',
-      password: 'password',
-    };
+    userQuery.getUserByEmail.mockResolvedValue(null);
+    (isValidEmail as jest.Mock).mockReturnValue(true);
+    user.steamNick = '';
 
     // When
-    mockUserQueries.getUserByEmail = jest.fn().mockResolvedValue(null);
+    const result = registerUserService(userQuery, user);
 
     // Then
-    try {
-      await mockService.registerUser(inputUser);
-    } catch (error) {
-      expect(error).toEqual(expectedResponse);
-    }
-
-    expect(mockUserQueries.getUserByEmail).toHaveBeenCalledWith(inputUser.email);
-    expect(bcrypt.hash).not.toHaveBeenCalled();
-    expect(mockUserQueries.insert).not.toHaveBeenCalled();
+    await expect(result).rejects.toThrow(new CustomError('Steam Nick and Steam ID are required', 400));
   });
 
-  it('should throw an error if bcrypt hash fails', async () => {
-    const expectedResponse = new CustomError('Error hashing password', 500);
+  it('should throw an error if password format is invalid', async () => {
     // Given
-    const inputUser: IUserWithPassword = {
-      username: 'John Doe',
-      email: 'john@example.com',
-      password: 'P@ssword123',
-    };
+    userQuery.getUserByEmail.mockResolvedValue(null);
+    (isValidEmail as jest.Mock).mockReturnValue(true);
+    (isValidPassword as jest.Mock).mockReturnValue(false);
 
     // When
-    mockUserQueries.getUserByEmail = jest.fn().mockResolvedValue(null);
-    (jest.spyOn(bcrypt, 'hash') as jest.Mock).mockRejectedValue(new Error('Error hashing password'));
+    const result = registerUserService(userQuery, user);
 
     // Then
-    try {
-      await mockService.registerUser(inputUser);
-    } catch (error) {
-      expect(error).toEqual(expectedResponse);
-    }
-
-    expect(mockUserQueries.getUserByEmail).toHaveBeenCalledWith(inputUser.email);
-    expect(bcrypt.hash).toHaveBeenCalledWith(inputUser.password, 10);
-    expect(mockUserQueries.insert).not.toHaveBeenCalled();
+    await expect(result).rejects.toThrow(new CustomError('Invalid password format', 400));
   });
 
-  it('should throw an error if user query insert fails', async () => {
-    const expectedResponse = new CustomError('Error inserting data', 500);
+  it('should successfully register a user', async () => {
     // Given
-    const inputUser: IUserWithPassword = {
-      username: 'John Doe',
-      email: 'john@email.com',
-      password: 'P@ssword123',
-    };
+    userQuery.getUserByEmail.mockResolvedValue(null);
+    (isValidEmail as jest.Mock).mockReturnValue(true);
+    (isValidPassword as jest.Mock).mockReturnValue(true);
+    (bcrypt.hash as jest.Mock).mockResolvedValue('hashedPassword');
+    userQuery.createNewUser.mockResolvedValue({ ...user, id: 1 });
 
     // When
-    mockUserQueries.getUserByEmail = jest.fn().mockResolvedValue(null);
-    (jest.spyOn(bcrypt, 'hash') as jest.Mock).mockResolvedValue('hashedPassword');
-    mockUserQueries.insert = jest.fn().mockRejectedValue(new Error('Error inserting data'));
+    const result = await registerUserService(userQuery, user);
 
     // Then
-    try {
-      await mockService.registerUser(inputUser);
-    } catch (error) {
-      expect(error).toEqual(expectedResponse);
-    }
-
-    expect(mockUserQueries.getUserByEmail).toHaveBeenCalledWith(inputUser.email);
-    expect(bcrypt.hash).toHaveBeenCalledWith(inputUser.password, 10);
-    expect(mockUserQueries.insert).toHaveBeenCalledWith({
-      username: inputUser.username,
-      email: inputUser.email,
-      password: 'hashedPassword',
-    });
+    expect(result).toEqual({ ...user, id: 1 });
   });
 });

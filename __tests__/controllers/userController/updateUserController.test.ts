@@ -2,7 +2,7 @@ import UserService from '@/services/userService';
 import { Request, Response, NextFunction } from 'express';
 import { updateUserController } from '@/controllers/userController';
 import { createResponse } from '@/utils/response';
-import { IUserBase } from '@/interfaces/user.interface';
+import { IUserBase } from '@/interfaces/userModel.interface';
 import { CustomError } from '@/utils/CustomError';
 
 jest.mock('@/services/UserService');
@@ -26,12 +26,12 @@ describe('updateUserController suite', () => {
   });
 
   it('Should return a 200 status code if user is updated', async () => {
-    const mockUser: IUserBase = { id: 1, username: 'John Doe', email: 'john@example.com' };
+    const mockUser: IUserBase = { id: 1, steamNick: 'John Doe', steamId: '', email: 'john@example.com' };
     const expectedResponse = createResponse('success', 'User updated', null);
 
     // Given
-    req.body = { username: 'John Doe', email: 'john@example.com', password: 'P@sword123' };
-    req.user = { id: 1, username: 'John Doe', email: 'john@example.com' };
+    req.body = { steamNick: 'John Doe', email: 'john@example.com', password: 'P@sword123' };
+    req.user = { id: 1, steamNick: 'John Doe', steamId: '', email: 'john@example.com' };
 
     // When
     // Mock the service behavior
@@ -50,8 +50,8 @@ describe('updateUserController suite', () => {
     const expectedResponse = new CustomError('Password field is required', 400);
 
     // Given
-    req.body = { username: 'John Doe', email: 'john@example.com' };
-    req.user = { id: 1, username: 'John Doe', email: 'john@example.com' };
+    req.body = { steamNick: 'John Doe', email: 'john@example.com' };
+    req.user = { id: 1, steamNick: 'John Doe', steamId: '', email: 'john@example.com' };
 
     // When
     await updateUserController(req, res as Response, next);
@@ -61,11 +61,14 @@ describe('updateUserController suite', () => {
   });
 
   it('Should return a 400 if no field to change is provided', async () => {
-    const expectedResponse = new CustomError('At least one field (username, email, or password) must be provided', 400);
+    const expectedResponse = new CustomError(
+      'At least one field (steamNick, email, or password) must be provided',
+      400
+    );
 
     // Given
     req.body = { password: 'P@sword123' };
-    req.user = { id: 1, username: 'John Doe', email: 'john@example.com' };
+    req.user = { id: 1, steamNick: 'John Doe', steamId: '', email: 'john@example.com' };
 
     // When
     await updateUserController(req, res as Response, next);
@@ -78,7 +81,7 @@ describe('updateUserController suite', () => {
     const expectedResponse = new CustomError('Invalid id field', 400);
 
     // Given
-    req.user = { id: NaN, username: '', email: '' };
+    req.user = { id: NaN, steamNick: '', steamId: '', email: '' };
 
     // When
     await updateUserController(req, res as Response, next);
@@ -106,7 +109,7 @@ describe('updateUserController suite', () => {
 
     // Given
     req.body = { email: 'john@example.com', password: 'P@sword123' };
-    req.user = { id: 1, username: 'John Doe', email: 'john@example.com' };
+    req.user = { id: 1, steamNick: 'John Doe', steamId: '', email: 'john@example.com' };
 
     // When
     (UserService as jest.Mock).mockImplementation(() => ({

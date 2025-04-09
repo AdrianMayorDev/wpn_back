@@ -1,11 +1,12 @@
 import { getUserController } from '@/controllers/userController';
-import UserService from '@/services/userService';
+import { UserModel } from '@/orm/users/UsersModel';
 import { CustomError } from '@/utils/CustomError';
 import { createResponse } from '@/utils/response';
-import { Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response } from 'express';
 
 // Mocks dependency
 jest.mock('@/services/UserService');
+jest.mock('@/orm/users/UsersModel');
 
 describe('getUserController suite', () => {
   let req: Request;
@@ -13,6 +14,7 @@ describe('getUserController suite', () => {
   let next: NextFunction;
 
   beforeEach(() => {
+    jest.resetAllMocks();
     req = {
       params: {},
     } as Request;
@@ -33,7 +35,7 @@ describe('getUserController suite', () => {
 
     // When
     // Mock the service behavior
-    (UserService as jest.Mock).mockImplementation(() => ({
+    (UserModel as jest.Mock).mockImplementation(() => ({
       getUserById: jest.fn().mockResolvedValue(mockUser),
     }));
 
@@ -73,7 +75,7 @@ describe('getUserController suite', () => {
     req.params = { userId: '1' };
 
     // When
-    (UserService as jest.Mock).mockImplementation(() => ({
+    (UserModel as jest.Mock).mockImplementation(() => ({
       getUserById: jest.fn().mockResolvedValue(null),
     }));
 

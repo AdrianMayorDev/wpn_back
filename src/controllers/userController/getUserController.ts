@@ -1,4 +1,4 @@
-import UserService from '../../services/userService';
+import { UserModel } from '@/orm/users/UsersModel';
 import { CustomError } from '@/utils/CustomError';
 import { logger } from '@/utils/logger';
 import { createResponse } from '@/utils/response';
@@ -8,14 +8,17 @@ const getUserController = async (req: Request, res: Response, next: NextFunction
   try {
     const { userId }: Record<string, string> = req.params;
 
+    // Validating user id
     if (!userId || isNaN(Number(userId))) {
       throw new CustomError('User id is required', 400);
     }
 
     const id = Number(userId);
-    const service = new UserService(id);
-    const userData = await service.getUserById();
-    console.info('userData', typeof userData);
+    const userModel = new UserModel(id);
+
+    // Fetching user data
+    const userData = await userModel.getUserById();
+
     if (userData) {
       logger.info(`User found: ${userData.email}`);
       res.status(200).json(createResponse('success', 'User found', userData));

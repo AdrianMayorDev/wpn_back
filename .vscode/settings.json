@@ -10,5 +10,6 @@
     "editor.defaultFormatter": "esbenp.prettier-vscode"
   },
   "javascript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets": true,
-  "typescript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets": true
+  "typescript.format.insertSpaceAfterOpeningAndBeforeClosingNonemptyBrackets": true,
+  "jest.jestCommandLine": "NODE_ENV=test npx jest --coverage"
 }

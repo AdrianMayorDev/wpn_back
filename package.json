@@ -5,18 +5,21 @@
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.2",
     "mysql2": "^3.12.0",
-    "tsconfig-paths": "^4.2.0"
+    "puppeteer": "^24.4.0",
+    "uuid": "^11.1.0"
   },
   "name": "wpn_back",
   "description": "",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "main": "dist/server.js",
   "scripts": {
     "prepare": "husky && husky install",
     "build": "npx tsc --project tsconfig.build.json && tsc-alias -p tsconfig.json",
-    "start": "node dist/server.js",
-    "dev": "nodemon -r tsconfig-paths/register src/server.ts",
-    "test": "NODE_ENV=test jest --coverage"
+    "start": "LOG_LEVEL=info node dist/server.js",
+    "dev": "LOG_LEVEL=debug NODE_ENV=development nodemon -r tsconfig-paths/register src/server.ts",
+    "dev:no-test": "LOG_LEVEL=debug NODE_ENV=development_no_test nodemon -r tsconfig-paths/register src/server.ts --ignore '**/*.test.ts'",
+    "dev:debug": "LOG_LEVEL=debug DEBUG_MODE=true NODE_ENV=development nodemon -r tsconfig-paths/register src/server.ts",
+    "test": "LOG_LEVEL=info NODE_ENV=test npx jest --coverage"
   },
   "keywords": [],
   "author": "",
@@ -27,7 +30,9 @@
     "@types/jest": "^29.5.14",
     "@types/jsonwebtoken": "^9.0.9",
     "@types/node": "^22.13.9",
+    "@types/puppeteer": "^7.0.4",
     "@types/supertest": "^6.0.2",
+    "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "concurrently": "^9.1.2",
     "eslint": "^8.57.1",
@@ -45,6 +50,7 @@
     "ts-jest": "^29.2.6",
     "ts-node": "^10.9.2",
     "tsc-alias": "^1.8.11",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.8.2"
   }
 }

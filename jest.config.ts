@@ -21,5 +21,6 @@ const config: Config.InitialOptions = {
     '^@utils/(.*)$': '<rootDir>/src/utils/$1',
   },
   testPathIgnorePatterns: ['/node_modules/', '/dist/'],
+  moduleDirectories: ['node_modules', 'src'],
 };
 export default config;
