@@ -1,48 +1,44 @@
-import { UserModel } from '@/orm/users/UsersModel';
-import { IUserWithID, UserFields } from '@/interfaces/userModel.interface';
-import { BaseQuery } from '@/orm/base/baseQuery';
+import BaseQuery from '@/DTO/base/baseQuery';
+import UserModelDTO from '@/DTO/usersModel/UsersModelDTO';
+import { IUserDataDB, IUserWithID } from '@/interfaces/userModel.interface';
 
-jest.mock('@/orm/base/baseQuery');
+jest.mock('@/DTO/base/baseQuery');
 
 describe('User ORM class', () => {
-  let userInstance: UserModel;
-  let mockBaseQuery: Partial<BaseQuery<IUserWithID>>;
+  let userInstance: UserModelDTO;
+  let mockBaseQuery: Partial<BaseQuery<IUserWithID, IUserDataDB>>;
 
   beforeEach(() => {
     jest.resetAllMocks();
     mockBaseQuery = {
       getByField: jest.fn(),
     };
-    userInstance = new UserModel(1);
-  });
-
-  it('should initialize with the correct id', () => {
-    expect(userInstance.getId()).toBe(1);
+    userInstance = new UserModelDTO('1');
   });
 
   it('should call getByField with correct parameters in getUserByEmail', async () => {
     // Given
     const email = 'john@example.com';
     const mockUser: IUserWithID = {
-      id: 1,
+      userId: '1',
       email: 'john@example.com',
       steamNick: 'JohnDoe',
-      steamId: '',
+      steamUserId: '',
       password: 'hashedPassword',
     };
 
-    mockBaseQuery.getByField = jest.fn().mockResolvedValue(mockUser);
+    mockBaseQuery.getByField = jest.fn().mockResolvedValue([mockUser]);
     (userInstance as any).getByField = mockBaseQuery.getByField;
 
     // When
-    const result = await userInstance.getUserByEmail(email);
+    const result = await userInstance.getUserByEmail({ email });
 
     // Then
-    expect(mockBaseQuery.getByField).toHaveBeenCalledWith(
-      [UserFields.ID, UserFields.EMAIL, UserFields.PASSWORD],
-      'email',
-      email
-    );
+    expect(mockBaseQuery.getByField).toHaveBeenCalledWith({
+      fieldsToSelect: ['email'],
+      keyField: 'email',
+      value: 'john@example.com',
+    });
     expect(result).toEqual(mockUser);
   });
 
@@ -54,14 +50,14 @@ describe('User ORM class', () => {
     (userInstance as any).getByField = mockBaseQuery.getByField;
 
     // When
-    const result = await userInstance.getUserByEmail(email);
+    const result = await userInstance.getUserByEmail({ email });
 
     // Then
-    expect(mockBaseQuery.getByField).toHaveBeenCalledWith(
-      [UserFields.ID, UserFields.EMAIL, UserFields.PASSWORD],
-      'email',
-      email
-    );
+    expect(mockBaseQuery.getByField).toHaveBeenCalledWith({
+      fieldsToSelect: ['email'],
+      keyField: 'email',
+      value: 'nonexistent@example.com',
+    });
     expect(result).toBeNull();
   });
 });

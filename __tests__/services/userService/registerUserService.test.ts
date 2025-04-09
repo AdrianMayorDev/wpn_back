@@ -1,31 +1,32 @@
+import UserModelDTO from '@/DTO/usersModel/UsersModelDTO';
 import { IUserWithPassword } from '@/interfaces/userModel.interface';
-import { UserModel } from '@/orm/users/UsersModel';
 import registerUserService from '@/services/userService/regsiterUserService';
 import { CustomError } from '@/utils/CustomError';
 import { isValidEmail, isValidPassword } from '@/utils/userValidations';
 import bcrypt from 'bcryptjs';
 
-jest.mock('@/orm/users/UsersModel');
+jest.mock('@/DTO/usersModel/UsersModelDTO');
+jest.mock('@/services/libraryService');
 jest.mock('@/utils/userValidations');
 jest.mock('bcryptjs');
 
 describe('registerUserService', () => {
-  let userQuery: jest.Mocked<UserModel>;
+  let userQuery: jest.Mocked<UserModelDTO>;
   let user: IUserWithPassword;
 
   beforeEach(() => {
-    userQuery = new UserModel() as jest.Mocked<UserModel>;
+    userQuery = new UserModelDTO() as jest.Mocked<UserModelDTO>;
     user = {
       email: 'test@example.com',
       password: 'P@ssw0rd',
       steamNick: 'testNick',
-      steamId: '123456789',
+      steamUserId: '123456789',
     };
   });
 
   it('should throw an error if user already exists', async () => {
     // Given
-    userQuery.getUserByEmail.mockResolvedValue({ ...user, id: 1 });
+    userQuery.getUserByEmail.mockResolvedValue({ ...user, userId: '1' });
 
     // When
     const result = registerUserService(userQuery, user);
@@ -78,12 +79,12 @@ describe('registerUserService', () => {
     (isValidEmail as jest.Mock).mockReturnValue(true);
     (isValidPassword as jest.Mock).mockReturnValue(true);
     (bcrypt.hash as jest.Mock).mockResolvedValue('hashedPassword');
-    userQuery.createNewUser.mockResolvedValue({ ...user, id: 1 });
+    userQuery.createNewUser.mockResolvedValue({ ...user, userId: '1' });
 
     // When
     const result = await registerUserService(userQuery, user);
 
     // Then
-    expect(result).toEqual({ ...user, id: 1 });
+    expect(result).toEqual({ ...user, userId: '1' });
   });
 });

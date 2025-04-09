@@ -14,6 +14,7 @@ describe('deleteUserController suite', () => {
   beforeEach(() => {
     req = {
       body: {},
+      userService: new UserService(),
     } as Request;
 
     res = {
@@ -30,13 +31,13 @@ describe('deleteUserController suite', () => {
 
     // Given
     req.body = { password: 'P@sword123' };
-    req.user = { id: 1, steamNick: 'John Doe', steamId: '', email: 'john@example.com' };
+    req.user = { userId: '1', steamNick: 'John Doe', steamUserId: '', email: 'john@example.com' };
 
     // When
     // Mock the service behavior
-    (UserService as jest.Mock).mockImplementation(() => ({
-      deleteUser: jest.fn().mockResolvedValue(mockUser),
-    }));
+    if (req.userService) {
+      req.userService.deleteUser = jest.fn().mockResolvedValue(mockUser);
+    }
 
     await deleteUserController(req, res as Response, next);
 
@@ -50,7 +51,7 @@ describe('deleteUserController suite', () => {
 
     // Given
     req.body = {};
-    req.user = { id: 1, steamNick: 'John Doe', steamId: '', email: 'john@example' };
+    req.user = { userId: '1', steamNick: 'John Doe', steamUserId: '', email: 'john@example' };
 
     // When
     await deleteUserController(req, res as Response, next);
@@ -73,31 +74,17 @@ describe('deleteUserController suite', () => {
     expect(next).toHaveBeenCalledWith(expectedResponse);
   });
 
-  it('Should return a 400 if id is not a number', async () => {
-    const expectedResponse = new CustomError('Invalid id field', 400);
-
-    // Given
-    req.body = { password: 'P@sword123' };
-    req.user = { id: NaN, steamNick: 'John Doe', steamId: '', email: '' };
-
-    // When
-    await deleteUserController(req, res as Response, next);
-
-    // Then
-    expect(next).toHaveBeenCalledWith(expectedResponse);
-  });
-
   it('Should call next with an error if the service throws an error', async () => {
     const expectedError = new Error('Service error');
 
     // Given
     req.body = { email: 'john@example.com', password: 'P@sword123' };
-    req.user = { id: 1, steamNick: 'John Doe', steamId: '', email: 'john@example.com' };
+    req.user = { userId: '1', steamNick: 'John Doe', steamUserId: '', email: 'john@example.com' };
 
     // When
-    (UserService as jest.Mock).mockImplementation(() => ({
-      deleteUser: jest.fn().mockRejectedValue(expectedError),
-    }));
+    if (req.userService) {
+      req.userService.deleteUser = jest.fn().mockRejectedValue(expectedError);
+    }
 
     await deleteUserController(req, res as Response, next);
 

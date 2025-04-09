@@ -1,34 +1,34 @@
 import { IUserWithPassword, IUserWithID } from '@/interfaces/userModel.interface';
-import { UserModel } from '@/orm/users/UsersModel';
+import UserModelDTO from '@/DTO/usersModel/UsersModelDTO';
 import { CustomError } from '@/utils/CustomError';
 import { isValidEmail, isValidPassword } from '@/utils/userValidations';
 import bcrypt from 'bcryptjs';
 import updateUserService from '@/services/userService/updateUserService';
 
-jest.mock('@/orm/users/UsersModel');
+jest.mock('@/DTO/usersModel/UsersModelDTO');
 jest.mock('bcryptjs');
 jest.mock('@/utils/userValidations');
 
 describe('updateUserService', () => {
-  let userQuery: jest.Mocked<UserModel>;
+  let userQuery: jest.Mocked<UserModelDTO>;
   let user: IUserWithPassword;
   let currentUser: IUserWithID;
 
   beforeEach(() => {
-    userQuery = new UserModel() as jest.Mocked<UserModel>;
+    userQuery = new UserModelDTO() as jest.Mocked<UserModelDTO>;
     user = {
       email: 'newemail@example.com',
       password: 'currentPassword123',
       steamNick: 'newSteamNick',
-      steamId: 'newSteamId',
+      steamUserId: 'newSteamId',
       newPassword: 'newPassword123',
     };
     currentUser = {
-      id: 1,
+      userId: '1',
       email: 'currentemail@example.com',
       password: 'hashedCurrentPassword',
       steamNick: 'currentSteamNick',
-      steamId: 'currentSteamId',
+      steamUserId: 'currentSteamId',
     };
   });
 

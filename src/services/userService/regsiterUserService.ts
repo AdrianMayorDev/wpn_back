@@ -1,15 +1,21 @@
-import { IUserBase, IUserWithPassword } from '@/interfaces/userModel.interface';
-import { UserModel } from '@/orm/users/UsersModel';
+import UserModelDTO from '@/DTO/usersModel/UsersModelDTO';
+import { IUserData, IUserWithPassword } from '@/interfaces/userModel.interface';
 import { CustomError } from '@/utils/CustomError';
 import { logger } from '@/utils/logger';
 import { isValidEmail, isValidPassword } from '@/utils/userValidations';
 import bcrypt from 'bcryptjs';
+import { v4 as uuidv4 } from 'uuid';
+import LibraryService from '../libraryService';
 
-const registerUserService = async (userQuery: UserModel, user: IUserWithPassword): Promise<IUserBase> => {
-  const { email, password, steamNick, steamId } = user;
+export interface IRegisterUserService {
+  register: (userQuery: UserModelDTO, user: IUserWithPassword) => Promise<IUserData>;
+}
+
+const registerUserService = async (userQuery: UserModelDTO, user: IUserWithPassword): Promise<IUserData> => {
+  const { email, password, steamNick, steamUserId } = user;
   logger.info(`email: ${email}, password: ${password}, steamNick: ${steamNick}`);
 
-  const existingUser = await userQuery.getUserByEmail(email);
+  const existingUser = await userQuery.getUserByEmail({ email });
 
   if (existingUser) {
     throw new CustomError('User already exists', 409);
@@ -19,27 +25,23 @@ const registerUserService = async (userQuery: UserModel, user: IUserWithPassword
     throw new CustomError('Invalid email format', 400);
   }
 
-  if (!steamNick || !steamId) {
+  if (!steamNick || !steamUserId) {
     throw new CustomError('Steam Nick and Steam ID are required', 400);
   }
-  // const checkSteamId = await this.userQuery.getSteamIdBySteamNick(steamNick);
-
-  // if (checkSteamId && checkSteamId !== steamId) {
-  //   throw new CustomError("Steam ID doesn't match the Steam Nick", 400);
-  // }
 
   if (!isValidPassword(password)) {
     throw new CustomError('Invalid password format', 400);
   }
 
+  const userId = uuidv4();
   const hashedPassword = await bcrypt.hash(password, 10);
-  // const hashedSteamId = await bcrypt.hash(steamId, 10);
-  // const hashedSteamNick = await bcrypt.hash(steamNick, 10);
-  // const hashedEmail = await bcrypt.hash(email, 10);
-
-  // const userToRegister = { email: hashedEmail, password: hashedPassword, steamNick: hashedSteamNick, steamId: hashedSteamId };
-  const userToRegister = { email, password: hashedPassword, steamNick, steamId };
+  const userToRegister = { userId, email, password: hashedPassword, steamNick, steamUserId };
   const response = await userQuery.createNewUser(userToRegister);
+
+  const defaultGameStatus = 'Pending';
+  await new LibraryService().createGameStatus(userId, defaultGameStatus);
+  logger.info(`User registered successfully: ${email}`);
+
   return response;
 };
 

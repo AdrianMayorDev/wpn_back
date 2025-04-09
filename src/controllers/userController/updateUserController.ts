@@ -1,4 +1,3 @@
-import UserService from '@/services/userService';
 import { CustomError } from '@/utils/CustomError';
 import { logger } from '@/utils/logger';
 import { createResponse } from '@/utils/response';
@@ -6,17 +5,21 @@ import { NextFunction, Request, Response } from 'express';
 
 const updateUserController = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { steamNick, steamId, email, newPassword, password }: Record<string, string> = req.body;
-    const id = Number(req.user?.id);
+    const { steamNick, steamUserId, email, newPassword, password }: Record<string, string> = req.body;
+    const { userService } = req;
 
-    // Check if the user is authenticated
+    if (!userService) {
+      throw new CustomError('Internal server error', 500);
+    }
+
     if (!req.user) {
       throw new CustomError('Unauthorized', 401);
     }
 
-    // Validating user id
-    if (isNaN(id)) {
-      throw new CustomError('Invalid id field', 400);
+    const { userId } = req.user;
+
+    if (!userId) {
+      throw new CustomError('Unauthorized', 401);
     }
 
     // Validating password field
@@ -29,14 +32,14 @@ const updateUserController = async (req: Request, res: Response, next: NextFunct
       throw new CustomError('At least one field (steamNick, email, or password) must be provided', 400);
     }
 
-    const userData = { email, password, steamNick, steamId };
-    const service = new UserService(id);
+    const userData = { email, password, steamNick, steamUserId };
 
+    // userService.setUserId(userId);
     // Updating user
-    await service.updateUser(userData);
+    const response = await userService.updateUser(userData);
 
     logger.info(`User updated: ${email}`);
-    res.status(200).json(createResponse('success', 'User updated', null));
+    res.status(200).json(createResponse('success', 'User updated', response));
   } catch (err) {
     next(err);
   }

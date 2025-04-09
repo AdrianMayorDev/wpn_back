@@ -4,7 +4,7 @@ import { logger } from '@/utils/logger';
 import { CustomError } from '@/utils/CustomError';
 import { mapKeys, toCamelCase, toSnakeCase } from '@/utils/mapKeys';
 
-export abstract class BaseQuery<T extends Record<string, any>, DBType extends Record<string, any>> {
+abstract class BaseQuery<T extends Record<string, any>, DBType extends Record<string, any>> {
   protected abstract table: string;
 
   protected mapToDbFields(data: T): DBType {
@@ -19,6 +19,9 @@ export abstract class BaseQuery<T extends Record<string, any>, DBType extends Re
   async insert(data: Partial<T>) {
     const connection = await getConnection();
     const mappedData = this.mapToDbFields(data as T);
+    logger.debug(`Data to insert: `, data);
+    logger.debug(`Mapped data: `, mappedData);
+
     const keys = Object.keys(mappedData).join(', ');
     const values = Object.values(mappedData);
     const placeholders = values.map(() => '?').join(', ');
@@ -62,16 +65,20 @@ export abstract class BaseQuery<T extends Record<string, any>, DBType extends Re
   }
 
   // Update
-  async update({ keyField, data }: { keyField: string; data: Partial<DBType> }) {
+  async update({ keyField, data, value }: { keyField: string; data: Partial<T>; value: string | number }) {
     const connection = await getConnection();
     const mappedData = this.mapToDbFields(data as T);
     try {
       const keys = Object.keys(mappedData)
         .map((key) => `${key} = ?`)
         .join(', ');
-      const values = [...Object.values(mappedData)];
+      const values = [...Object.values(mappedData), value];
 
       const query = `UPDATE ${this.table} SET ${keys} WHERE ${keyField} = ?`;
+
+      logger.debug(`Query to update: `, query);
+      logger.debug(`Values to update: `, values);
+
       const [result] = await connection.execute<ResultSetHeader>(query, values);
 
       console.info(`Result: `, result);
@@ -118,9 +125,12 @@ export abstract class BaseQuery<T extends Record<string, any>, DBType extends Re
       const select = fieldsToSelect.join(', ');
       const [rows] = await connection.execute(`SELECT ${select} FROM ${this.table} WHERE ${keyField} = ?`, [value]);
       const data = rows as DBType[];
+
       if (data.length > 0) {
-        return this.mapToModel(data[0]);
+        return data.map((item) => this.mapToModel(item)) as T[];
       }
+
+      logger.warn(`No data found for ${keyField}: ${value}`);
       return null;
     } catch (err) {
       throw new CustomError('Error fetching data by field', 500, err as Error);
@@ -167,3 +177,5 @@ export abstract class BaseQuery<T extends Record<string, any>, DBType extends Re
     }
   }
 }
+
+export default BaseQuery;

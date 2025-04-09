@@ -1,15 +1,19 @@
+import UserModelDTO from '@/DTO/usersModel/UsersModelDTO';
 import { IUserWithID, IUserWithPassword, UserFields } from '@/interfaces/userModel.interface';
-import { UserModel } from '@/orm/users/UsersModel';
 import { CustomError } from '@/utils/CustomError';
 import { logger } from '@/utils/logger';
 import { isValidEmail, isValidPassword } from '@/utils/userValidations';
 import bcrypt from 'bcryptjs';
 
-const updateUserService = async (userQuery: UserModel, user: IUserWithPassword): Promise<void> => {
-  const { email: newEmail, password, steamNick: newSteamNick, steamId, newPassword } = user;
+const updateUserService = async (userQuery: UserModelDTO, user: IUserWithPassword) => {
+  const { email: newEmail, password, steamNick: newSteamNick, steamUserId, newPassword } = user;
 
-  const selectFields = [UserFields.ALL];
-  const currentUser = await userQuery.getUserById(selectFields);
+  const fieldsToSelect = [UserFields.ALL];
+  const currentUser = await userQuery.getUserById({ fieldsToSelect });
+
+  if (!currentUser) {
+    throw new CustomError('User not found', 404);
+  }
 
   // if (newSteamNick) {
   //   if (newSteamNick === currentUser.steamNick) {
@@ -42,9 +46,10 @@ const updateUserService = async (userQuery: UserModel, user: IUserWithPassword):
     }
 
     logger.info(`Checking if email ${newEmail} is already in use by another user`);
-    const existingEmailUser = await userQuery.getUserByEmail(newEmail);
+    const fieldsToSelect = [UserFields.EMAIL, UserFields.ID];
+    const existingEmailUser = await userQuery.getUserByEmail({ fieldsToSelect, email: newEmail });
     console.info(`Existing user: `, existingEmailUser);
-    if (existingEmailUser && existingEmailUser.id !== currentUser.id) {
+    if (existingEmailUser && existingEmailUser.userId !== currentUser.userId) {
       throw new CustomError('Email already in use by another user', 409);
     }
   }
@@ -60,14 +65,17 @@ const updateUserService = async (userQuery: UserModel, user: IUserWithPassword):
   // Preparing user data to update
   const userToUpdate: IUserWithID = {
     ...currentUser,
-    id: currentUser.id,
+    userId: currentUser.userId,
     email: newEmail ?? currentUser.email,
     password: hashedPassword,
     steamNick: newSteamNick ?? currentUser.steamNick,
-    steamId: steamId ?? currentUser.steamId,
+    steamUserId: steamUserId ?? currentUser.steamUserId,
   };
 
+  logger.debug(`User to update: `, userToUpdate);
+
   // Updating user
-  await userQuery.updateUser(userToUpdate);
+  const response = await userQuery.updateUser(userToUpdate);
+  return response;
 };
 export default updateUserService;
