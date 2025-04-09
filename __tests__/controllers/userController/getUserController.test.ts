@@ -1,12 +1,12 @@
 import { getUserController } from '@/controllers/userController';
-import { UserModel } from '@/orm/users/UsersModel';
+import UserModelDTO from '@/DTO/usersModel/UsersModelDTO';
 import { CustomError } from '@/utils/CustomError';
 import { createResponse } from '@/utils/response';
 import { NextFunction, Request, Response } from 'express';
 
 // Mocks dependency
 jest.mock('@/services/UserService');
-jest.mock('@/orm/users/UsersModel');
+jest.mock('@/DTO/usersModel/UsersModelDTO');
 
 describe('getUserController suite', () => {
   let req: Request;
@@ -35,7 +35,7 @@ describe('getUserController suite', () => {
 
     // When
     // Mock the service behavior
-    (UserModel as jest.Mock).mockImplementation(() => ({
+    (UserModelDTO as jest.Mock).mockImplementation(() => ({
       getUserById: jest.fn().mockResolvedValue(mockUser),
     }));
 
@@ -66,7 +66,7 @@ describe('getUserController suite', () => {
     await getUserController(req, res as Response, next);
 
     // Then
-    expect(next).toHaveBeenCalledWith(new CustomError('User id is required', 400));
+    expect(next).toHaveBeenCalledWith(new CustomError('User not found', 400));
   });
 
   it('Should return a 404 error if the user does not exist', async () => {
@@ -75,7 +75,7 @@ describe('getUserController suite', () => {
     req.params = { userId: '1' };
 
     // When
-    (UserModel as jest.Mock).mockImplementation(() => ({
+    (UserModelDTO as jest.Mock).mockImplementation(() => ({
       getUserById: jest.fn().mockResolvedValue(null),
     }));
 

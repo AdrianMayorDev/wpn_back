@@ -2,7 +2,7 @@ import UserService from '@/services/userService';
 import { Request, Response, NextFunction } from 'express';
 import { updateUserController } from '@/controllers/userController';
 import { createResponse } from '@/utils/response';
-import { IUserBase } from '@/interfaces/userModel.interface';
+import { IUserData } from '@/interfaces/userModel.interface';
 import { CustomError } from '@/utils/CustomError';
 
 jest.mock('@/services/UserService');
@@ -15,6 +15,7 @@ describe('updateUserController suite', () => {
   beforeEach(() => {
     req = {
       body: {},
+      userService: new UserService(),
     } as Request;
 
     res = {
@@ -26,18 +27,18 @@ describe('updateUserController suite', () => {
   });
 
   it('Should return a 200 status code if user is updated', async () => {
-    const mockUser: IUserBase = { id: 1, steamNick: 'John Doe', steamId: '', email: 'john@example.com' };
-    const expectedResponse = createResponse('success', 'User updated', null);
+    const mockUser: IUserData = { userId: '1', steamNick: 'John Doe', steamUserId: '', email: 'john@example.com' };
+    const expectedResponse = createResponse('success', 'User updated', mockUser);
 
     // Given
     req.body = { steamNick: 'John Doe', email: 'john@example.com', password: 'P@sword123' };
-    req.user = { id: 1, steamNick: 'John Doe', steamId: '', email: 'john@example.com' };
+    req.user = { userId: '1', steamNick: 'John Doe', steamUserId: '', email: 'john@example.com' };
 
     // When
     // Mock the service behavior
-    (UserService as jest.Mock).mockImplementation(() => ({
-      updateUser: jest.fn().mockResolvedValue(mockUser),
-    }));
+    if (req.userService) {
+      req.userService.updateUser = jest.fn().mockResolvedValue(mockUser);
+    }
 
     await updateUserController(req, res as Response, next);
 
@@ -51,7 +52,7 @@ describe('updateUserController suite', () => {
 
     // Given
     req.body = { steamNick: 'John Doe', email: 'john@example.com' };
-    req.user = { id: 1, steamNick: 'John Doe', steamId: '', email: 'john@example.com' };
+    req.user = { userId: '1', steamNick: 'John Doe', steamUserId: '', email: 'john@example.com' };
 
     // When
     await updateUserController(req, res as Response, next);
@@ -68,20 +69,7 @@ describe('updateUserController suite', () => {
 
     // Given
     req.body = { password: 'P@sword123' };
-    req.user = { id: 1, steamNick: 'John Doe', steamId: '', email: 'john@example.com' };
-
-    // When
-    await updateUserController(req, res as Response, next);
-
-    // Then
-    expect(next).toHaveBeenCalledWith(expectedResponse);
-  });
-
-  it('Should return a 400 if id is not a number', async () => {
-    const expectedResponse = new CustomError('Invalid id field', 400);
-
-    // Given
-    req.user = { id: NaN, steamNick: '', steamId: '', email: '' };
+    req.user = { userId: '1', steamNick: 'John Doe', steamUserId: '', email: 'john@example.com' };
 
     // When
     await updateUserController(req, res as Response, next);
@@ -109,12 +97,12 @@ describe('updateUserController suite', () => {
 
     // Given
     req.body = { email: 'john@example.com', password: 'P@sword123' };
-    req.user = { id: 1, steamNick: 'John Doe', steamId: '', email: 'john@example.com' };
+    req.user = { userId: '1', steamNick: 'John Doe', steamUserId: '', email: 'john@example.com' };
 
     // When
-    (UserService as jest.Mock).mockImplementation(() => ({
-      updateUser: jest.fn().mockRejectedValue(expectedError),
-    }));
+    if (req.userService) {
+      req.userService.updateUser = jest.fn().mockRejectedValue(expectedError);
+    }
 
     await updateUserController(req, res as Response, next);
 

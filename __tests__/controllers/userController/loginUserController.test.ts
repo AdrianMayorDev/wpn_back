@@ -15,6 +15,7 @@ describe('loginUserController suite', () => {
   beforeEach(() => {
     req = {
       body: {},
+      userService: new UserService(),
     } as Request;
 
     res = {
@@ -34,9 +35,9 @@ describe('loginUserController suite', () => {
 
     // When
     // Mock the service behavior
-    (UserService as jest.Mock).mockImplementation(() => ({
-      loginUser: jest.fn().mockResolvedValue(mockToken),
-    }));
+    if (req.userService) {
+      req.userService.loginUser = jest.fn().mockResolvedValue(mockToken);
+    }
 
     await loginUserController(req, res as Response, next);
 
@@ -104,9 +105,9 @@ describe('loginUserController suite', () => {
     req.body = { email: 'john@example.com', password: 'P@sword123' };
 
     // When
-    (UserService as jest.Mock).mockImplementation(() => ({
-      loginUser: jest.fn().mockRejectedValue(expectedError),
-    }));
+    if (req.userService) {
+      req.userService.loginUser = jest.fn().mockRejectedValue(expectedError);
+    }
 
     await loginUserController(req, res as Response, next);
 

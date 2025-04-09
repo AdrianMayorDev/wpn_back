@@ -1,27 +1,27 @@
 import { IUserLogin, IUserPayload } from '@/interfaces/userModel.interface';
-import { UserModel } from '@/orm/users/UsersModel';
 import { CustomError } from '@/utils/CustomError';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import loginUserService from '@/services/userService/loginUserService';
+import UserModelDTO from '@/DTO/usersModel/UsersModelDTO';
 
-jest.mock('@/orm/users/UsersModel');
+jest.mock('@/DTO/usersModel/UsersModelDTO');
 jest.mock('bcryptjs');
 jest.mock('jsonwebtoken');
 
 describe('loginUserService', () => {
-  let userQuery: jest.Mocked<UserModel>;
+  let userQuery: jest.Mocked<UserModelDTO>;
   let credentials: IUserLogin;
   let user: IUserPayload;
 
   beforeEach(() => {
-    userQuery = new UserModel() as jest.Mocked<UserModel>;
+    userQuery = new UserModelDTO() as jest.Mocked<UserModelDTO>;
     credentials = {
       email: 'test@example.com',
       password: 'password123',
     };
     user = {
-      id: 1,
+      userId: '1',
       email: 'test@example.com',
     };
   });
@@ -43,7 +43,7 @@ describe('loginUserService', () => {
     userQuery.getUserByEmail.mockResolvedValue({
       ...user,
       password: 'hashedPassword',
-      steamId: '123456789',
+      steamUserId: '123456789',
       steamNick: 'testNick',
     });
     (bcrypt.compare as jest.Mock).mockResolvedValue(false);
@@ -61,7 +61,7 @@ describe('loginUserService', () => {
     userQuery.getUserByEmail.mockResolvedValue({
       ...user,
       password: 'hashedPassword',
-      steamId: '123456789',
+      steamUserId: '123456789',
       steamNick: 'testNick',
     });
     (bcrypt.compare as jest.Mock).mockResolvedValue(true);
@@ -73,6 +73,8 @@ describe('loginUserService', () => {
 
     // Then
     expect(result).toEqual({ token });
-    expect(jwt.sign).toHaveBeenCalledWith({ id: user.id, email: user.email }, 'your_jwt_secret', { expiresIn: '3d' });
+    expect(jwt.sign).toHaveBeenCalledWith({ userId: user.userId, email: user.email }, 'secret', {
+      expiresIn: '3d',
+    });
   });
 });

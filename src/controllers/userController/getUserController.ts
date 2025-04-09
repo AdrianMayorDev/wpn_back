@@ -1,4 +1,4 @@
-import { UserModel } from '@/orm/users/UsersModel';
+import UserModelDTO from '@/DTO/usersModel/UsersModelDTO';
 import { CustomError } from '@/utils/CustomError';
 import { logger } from '@/utils/logger';
 import { createResponse } from '@/utils/response';
@@ -9,15 +9,14 @@ const getUserController = async (req: Request, res: Response, next: NextFunction
     const { userId }: Record<string, string> = req.params;
 
     // Validating user id
-    if (!userId || isNaN(Number(userId))) {
+    if (!userId) {
       throw new CustomError('User id is required', 400);
     }
 
-    const id = Number(userId);
-    const userModel = new UserModel(id);
+    const userModel = new UserModelDTO(userId);
 
     // Fetching user data
-    const userData = await userModel.getUserById();
+    const userData = await userModel.getUserById({});
 
     if (userData) {
       logger.info(`User found: ${userData.email}`);
