@@ -47,10 +47,20 @@ class GameStatusModelDTO extends BaseQuery<IGameStatusData, IGameStatusDataDB> {
     const gameStatus = await this.getByField({
       fieldsToSelect: [this.fields.GAME_STATUS_ID, this.fields.NAME, this.fields.USER_ID],
       keyField: this.fields.GAME_STATUS_ID,
-      value: gameStatusId,
+      values: [gameStatusId, 'admin'],
     });
 
     return gameStatus?.[0] ?? null;
+  }
+
+  async getAllStatus(userId: string): Promise<IGameStatusData[]> {
+    const gameStatuses = await this.getByField({
+      fieldsToSelect: [this.fields.GAME_STATUS_ID, this.fields.NAME],
+      keyField: this.fields.USER_ID,
+      values: [userId, 'admin'],
+    });
+
+    return gameStatuses ?? [];
   }
 }
 

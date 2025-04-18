@@ -9,13 +9,15 @@ import removeGameFromLibraryController from '@/controllers/libraryController/rem
 import getUserLibraryController from '@/controllers/libraryController/getUserLibraryController';
 import getGameController from '@/controllers/libraryController/getGameController';
 import getGameStatusController from '@/controllers/libraryController/getGamesStatusController';
+import getAllStatusController from '@/controllers/libraryController/getAllStatusController';
 
 const router = express.Router();
 
 // GET
 router.get('/', authMiddleware, getUserLibraryController);
 router.get('/game/:gameId', getGameController);
-router.get('/status', authMiddleware, getGameStatusController);
+router.get('/status/:gameId', authMiddleware, getGameStatusController);
+router.get('/allStatus', authMiddleware, getAllStatusController);
 
 // POST
 router.post('/sync', authMiddleware, syncLibraryController);

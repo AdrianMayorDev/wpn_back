@@ -23,6 +23,8 @@ describe('loginUserService', () => {
     user = {
       userId: '1',
       email: 'test@example.com',
+      steamAvatar: 'avatar_url',
+      steamUserId: '123456789',
     };
   });
 
@@ -73,8 +75,18 @@ describe('loginUserService', () => {
 
     // Then
     expect(result).toEqual({ token });
-    expect(jwt.sign).toHaveBeenCalledWith({ userId: user.userId, email: user.email }, 'secret', {
-      expiresIn: '3d',
-    });
+    expect(jwt.sign).toHaveBeenCalledWith(
+      {
+        userId: user.userId,
+        email: user.email,
+        steamAvatar: user.steamAvatar,
+        steamUserId: user.steamUserId,
+        steamNick: 'testNick',
+      },
+      'secret',
+      {
+        expiresIn: '3d',
+      }
+    );
   });
 });

@@ -32,10 +32,14 @@ const syncLibraryController = async (req: Request, res: Response, next: NextFunc
 
     const service = new LibraryService();
 
-    await service.syncLibrary({ userId, steamNick, steamId });
+    const libraryData = await service.getLibrarySteam({ userId, steamNick, steamId });
+
+    const totalGames = libraryData.length;
+    res.status(201).json(createResponse('success', 'Library sync started', totalGames));
+
+    await service.syncLibrary({ userId, steamNick, steamId, libraryData });
 
     logger.info(`Library sync completed for userId: ${userId}`);
-    res.status(201).json(createResponse('success', 'Library created'));
   } catch (err) {
     next(err);
   }

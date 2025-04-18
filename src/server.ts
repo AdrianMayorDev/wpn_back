@@ -4,6 +4,11 @@ import { app } from '@/app';
 import { logger } from './utils/logger';
 import libraryRoutes from './routes/library.routes';
 import { userServiceMiddleware } from './middlewares/userServiceMiddleware';
+import cors from 'cors';
+import externalApiRoutes from './routes/externalApi.routes';
+
+// Enable CORS
+app.use(cors());
 
 // Debug Middleware
 app.use((req, _res, next) => {
@@ -17,6 +22,7 @@ app.use(userServiceMiddleware);
 // Routes
 app.use('/user', userRoutes);
 app.use('/library', libraryRoutes);
+app.use('/externalApi', externalApiRoutes);
 
 // Test Middleware
 app.get('/test', (_req, res) => {

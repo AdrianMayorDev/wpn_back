@@ -20,6 +20,7 @@ export const authMiddleware = async (req: Request, _res: Response, next: NextFun
   try {
     // Extracting the token from the headers
     const { authorization } = req.headers;
+    console.log('Authorization header:', authorization);
     if (!authorization) {
       throw new CustomError('Unauthorized', 401);
     }

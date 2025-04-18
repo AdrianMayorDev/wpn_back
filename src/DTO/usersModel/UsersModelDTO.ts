@@ -39,8 +39,8 @@ class UserModelDTO extends BaseQuery<IUserWithID, IUserDataDB> {
     fieldsToSelect?: UserFields[];
   }): Promise<IUserWithID | null> {
     const keyField = this.fields.EMAIL;
-    const value = email;
-    const user = await this.getByField({ fieldsToSelect, keyField, value });
+    const values = [email];
+    const user = await this.getByField({ fieldsToSelect, keyField, values });
     if (!user) return null;
 
     logger.debug(`User found: `, user);
@@ -55,9 +55,9 @@ class UserModelDTO extends BaseQuery<IUserWithID, IUserDataDB> {
     fieldsToSelect?: UserFields[];
   }) {
     const keyField = this.fields.ID;
-    const value = this.id ?? '';
+    const values = [this.id ?? ''];
 
-    const user = await this.getByField({ fieldsToSelect, keyField, value });
+    const user = await this.getByField({ fieldsToSelect, keyField, values });
 
     if (!user) return null;
 

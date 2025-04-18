@@ -10,6 +10,8 @@ const updateGameStatusService = async (gameStatusModel: GameStatusModelDTO, game
 
   if (gameStatus.userId !== userId) throw new CustomError('Unauthorized', 401);
 
+  if (gameStatusId === '1') throw new CustomError('Cannot update default game status', 400);
+
   const data = { name, userId };
 
   await gameStatusModel.updateGameStatus(gameStatusId, data);

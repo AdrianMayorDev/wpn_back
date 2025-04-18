@@ -1,15 +1,12 @@
 import { IUserData } from '@/interfaces/userModel.interface';
-import { IGetSteamOwnedGames } from '@/interfaces/response.interface';
 import ScrapingService from '../scrappingService/ScrapingService';
 import GamesModel from '@/DTO/gamesModel/GamesModelDTO';
 import LibraryModelDTO from '@/DTO/libraryModel/LibraryModelDTO';
 import { logger } from '@/utils/logger';
 import { v4 as uuidv4 } from 'uuid';
-import { config } from '@/config';
 import { IGameData, ISteamGameData } from '@/interfaces/gameModel.interface';
 import { CustomError } from '@/utils/CustomError';
-
-const STEAM_API_KEY = config.STEAM_API_KEY;
+import GameStatusModelDTO from '@/DTO/gameStatusModel/GameStatusModelDTO';
 
 const syncLibraryService = async ({
   userId,
@@ -18,6 +15,7 @@ const syncLibraryService = async ({
   scrapingService,
   gamesModel,
   libraryModel,
+  libraryJson,
 }: {
   userId: string;
   steamNick: IUserData['steamNick'];
@@ -25,16 +23,15 @@ const syncLibraryService = async ({
   scrapingService: ScrapingService;
   gamesModel: GamesModel;
   libraryModel: LibraryModelDTO;
+  gameStatusModel: GameStatusModelDTO;
+  libraryJson: ISteamGameData[];
 }) => {
   try {
     logger.info(`Access to sync library service. userId: ${userId}, steamNick: ${steamNick}, steamId: ${steamId}`);
 
-    await validateSteamUser(steamNick, steamId);
-    const libraryJson = await fetchLibraryData(steamId);
-
     await scrapingService.captureApiUrlOnce();
 
-    for (const game of libraryJson.response.games) {
+    for (const game of libraryJson) {
       await processGame(userId, game);
     }
   } catch (error) {
@@ -42,46 +39,48 @@ const syncLibraryService = async ({
     throw new CustomError(`Error in syncLibraryService: ${err.message}`, 500, err);
   }
 
-  async function validateSteamUser(steamNick: string, steamId: string) {
-    try {
-      const steamNickData = await fetch(
-        `https://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=${STEAM_API_KEY}&vanityurl=${steamNick}`
-      );
-      const steamNickJson = await steamNickData.json();
-      logger.info(`SteamNick data fetched: ${JSON.stringify(steamNickJson)}`);
+  // async function validateSteamUser(steamNick: string, steamId: string) {
+  //   try {
+  //     const steamNickData = await fetch(
+  //       `https://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=${STEAM_API_KEY}&vanityurl=${steamNick}`
+  //     );
+  //     const steamNickJson = await steamNickData.json();
+  //     logger.info(`SteamNick data fetched: ${JSON.stringify(steamNickJson)}`);
 
-      const steamIdData = await fetch(
-        `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${STEAM_API_KEY}&steamids=${steamId}`
-      );
-      const steamIdJson = await steamIdData.json();
-      logger.info(`SteamId data fetched: ${JSON.stringify(steamIdJson)}`);
+  //     const steamIdData = await fetch(
+  //       `https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=${STEAM_API_KEY}&steamids=${steamId}`
+  //     );
+  //     console.log(`SteamId data fetched: ${JSON.stringify(steamIdData)}`);
+  //     const steamIdJson = await steamIdData.json();
+  //     logger.info(`SteamId data fetched: ${JSON.stringify(steamIdJson)}`);
 
-      if (
-        steamNickJson.response.steamid !== steamId ||
-        !steamIdJson.response.players[0].profileurl.includes(steamNick)
-      ) {
-        throw new CustomError('Invalid steamNick or steamId', 400);
-      }
-    } catch (error) {
-      const err = error as Error;
-      throw new CustomError(`Error validating Steam user: ${err.message}`, 500, err);
-    }
-  }
+  //     if (
+  //       steamNickJson.response.steamid.toLowerCase() !== steamId.toLowerCase() ||
+  //       !steamIdJson.response.players[0].profileurl.includes(steamNick)
+  //     ) {
+  //       logger.error(`Invalid steamNick or steamId: ${steamNick}, ${steamId}`);
+  //       throw new CustomError('Invalid steamNick or steamId', 400);
+  //     }
+  //   } catch (error) {
+  //     const err = error as Error;
+  //     throw new CustomError(`Error validating Steam user: ${err.message}`, 500, err);
+  //   }
+  // }
 
-  async function fetchLibraryData(steamId: string): Promise<IGetSteamOwnedGames> {
-    try {
-      logger.info(`Fetching library data for steamId: ${steamId}`);
-      const libraryData = await fetch(
-        `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${STEAM_API_KEY}&steamid=${steamId}&include_appinfo=true`
-      );
-      const libraryJson: IGetSteamOwnedGames = await libraryData.json();
-      logger.info(`Library data fetched: ${JSON.stringify(libraryJson)}`);
-      return libraryJson;
-    } catch (error) {
-      const err = error as Error;
-      throw new CustomError(`Error fetching library data: ${err.message}`, 500, err);
-    }
-  }
+  // async function fetchLibraryData(steamId: string): Promise<IGetSteamOwnedGames> {
+  //   try {
+  //     logger.info(`Fetching library data for steamId: ${steamId}`);
+  //     const libraryData = await fetch(
+  //       `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${STEAM_API_KEY}&steamid=${steamId}&include_appinfo=true`
+  //     );
+  //     const libraryJson: IGetSteamOwnedGames = await libraryData.json();
+  //     logger.info(`Library data fetched: ${JSON.stringify(libraryJson)}`);
+  //     return libraryJson;
+  //   } catch (error) {
+  //     const err = error as Error;
+  //     throw new CustomError(`Error fetching library data: ${err.message}`, 500, err);
+  //   }
+  // }
 
   async function processGame(userId: string, game: ISteamGameData) {
     try {
@@ -146,7 +145,7 @@ const syncLibraryService = async ({
       const gameToAdd = {
         userId,
         gameId: gameData.gameId,
-        gameStatusId: 1,
+        gameStatusId: '1',
       };
 
       await libraryModel.addGameToLibrary(gameToAdd);
@@ -168,7 +167,7 @@ const syncLibraryService = async ({
         const gameToAdd = {
           userId,
           gameId,
-          gameStatusId: 1,
+          gameStatusId: '1',
         };
         await libraryModel.addGameToLibrary(gameToAdd);
         logger.info(`Game added to library: ${gameTitle}`);

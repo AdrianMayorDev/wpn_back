@@ -5,14 +5,13 @@ import { logger } from '@/utils/logger';
 import { isValidEmail, isValidPassword } from '@/utils/userValidations';
 import bcrypt from 'bcryptjs';
 import { v4 as uuidv4 } from 'uuid';
-import LibraryService from '../libraryService';
 
 export interface IRegisterUserService {
   register: (userQuery: UserModelDTO, user: IUserWithPassword) => Promise<IUserData>;
 }
 
 const registerUserService = async (userQuery: UserModelDTO, user: IUserWithPassword): Promise<IUserData> => {
-  const { email, password, steamNick, steamUserId } = user;
+  const { email, password, steamNick, steamUserId, steamAvatar } = user;
   logger.info(`email: ${email}, password: ${password}, steamNick: ${steamNick}`);
 
   const existingUser = await userQuery.getUserByEmail({ email });
@@ -35,11 +34,11 @@ const registerUserService = async (userQuery: UserModelDTO, user: IUserWithPassw
 
   const userId = uuidv4();
   const hashedPassword = await bcrypt.hash(password, 10);
-  const userToRegister = { userId, email, password: hashedPassword, steamNick, steamUserId };
+  const userToRegister = { userId, email, password: hashedPassword, steamNick, steamUserId, steamAvatar };
   const response = await userQuery.createNewUser(userToRegister);
 
-  const defaultGameStatus = 'Pending';
-  await new LibraryService().createGameStatus(userId, defaultGameStatus);
+  // const defaultGameStatus = 'Pending';
+  // await new LibraryService().createGameStatus(userId, defaultGameStatus);
   logger.info(`User registered successfully: ${email}`);
 
   return response;

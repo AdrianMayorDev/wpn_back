@@ -114,23 +114,27 @@ abstract class BaseQuery<T extends Record<string, any>, DBType extends Record<st
   async getByField({
     fieldsToSelect,
     keyField,
-    value,
+    values,
   }: {
     fieldsToSelect: string[];
     keyField: string;
-    value: string | number;
+    values: Array<string | number>;
   }) {
     const connection = await getConnection();
     try {
       const select = fieldsToSelect.join(', ');
-      const [rows] = await connection.execute(`SELECT ${select} FROM ${this.table} WHERE ${keyField} = ?`, [value]);
+      console.log(values.length, 'values', values);
+      const whereClause = values.map(() => `${keyField} = ?`).join(' OR ');
+
+      const query = `SELECT ${select} FROM ${this.table} WHERE ${whereClause}`;
+      logger.info(`Query to get by field: ${query}`, values);
+      const [rows] = await connection.execute(query, values);
       const data = rows as DBType[];
 
       if (data.length > 0) {
         return data.map((item) => this.mapToModel(item)) as T[];
       }
 
-      logger.warn(`No data found for ${keyField}: ${value}`);
       return null;
     } catch (err) {
       throw new CustomError('Error fetching data by field', 500, err as Error);

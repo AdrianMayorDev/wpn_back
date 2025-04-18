@@ -18,6 +18,8 @@ export const userServiceMiddleware = async (req: Request, _res: Response, next: 
   try {
     const { authorization } = req.headers;
 
+    console.log('Authorization header 2:', authorization);
+
     let decoded;
     let user;
 

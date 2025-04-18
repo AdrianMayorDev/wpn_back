@@ -20,7 +20,7 @@ interface ILibraryDataDB {
 interface ILibraryData {
   userId: string;
   gameId: string;
-  gameStatusId: number;
+  gameStatusId: string;
   addedAt?: Date;
   updatedAt?: Date;
   manualIndex?: number;

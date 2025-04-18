@@ -7,6 +7,12 @@ import { IUserData } from '@/interfaces/userModel.interface';
 
 // Mocks dependency
 jest.mock('@/services/UserService');
+jest.mock('@/utils/logger', () => ({
+  logger: {
+    info: jest.fn(),
+    error: jest.fn(),
+  },
+}));
 
 describe('createUserController suite', () => {
   let req: Request;

@@ -1,16 +1,23 @@
-import { IUserLogin, IUserPayload, UserFields } from '@/interfaces/userModel.interface';
+import { config } from '@/config';
+import UserModelDTO from '@/DTO/usersModel/UsersModelDTO';
+import { IUserData, IUserLogin, UserFields } from '@/interfaces/userModel.interface';
 import { CustomError } from '@/utils/CustomError';
 import { logger } from '@/utils/logger';
 import bcrypt from 'bcryptjs';
 import jwt, { JwtPayload } from 'jsonwebtoken';
-import { config } from '@/config';
-import UserModelDTO from '@/DTO/usersModel/UsersModelDTO';
 
 const JWT_SECRET = config.JWT_SECRET;
 
 async function loginUserService(userQuery: UserModelDTO, credentials: IUserLogin): Promise<JwtPayload> {
   const { email, password } = credentials;
-  const fieldsToSelect = [UserFields.ID, UserFields.EMAIL, UserFields.PASSWORD];
+  const fieldsToSelect = [
+    UserFields.ID,
+    UserFields.EMAIL,
+    UserFields.PASSWORD,
+    UserFields.STEAMAVATAR,
+    UserFields.STEAMUSERID,
+    UserFields.STEAMNICK,
+  ];
   const user = await userQuery.getUserByEmail({ fieldsToSelect, email });
 
   if (!user) {
@@ -30,7 +37,13 @@ async function loginUserService(userQuery: UserModelDTO, credentials: IUserLogin
     throw new CustomError('User not found', 404);
   }
 
-  const payload: IUserPayload = { userId: user.userId, email: user.email };
+  const payload: Partial<IUserData> = {
+    userId: user.userId,
+    email: user.email,
+    steamAvatar: user.steamAvatar ?? '',
+    steamUserId: user.steamUserId,
+    steamNick: user.steamNick,
+  };
   const token = jwt.sign(payload, JWT_SECRET, { expiresIn: '3d' });
   logger.info(`User ${user.email} logged in successfully`);
 

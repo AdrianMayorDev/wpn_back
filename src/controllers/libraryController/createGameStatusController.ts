@@ -22,10 +22,10 @@ const createGameStatusController = async (req: Request, res: Response, next: Nex
     }
 
     const service = new LibraryService();
-    await service.createGameStatus(userId, name);
+    const response = await service.createGameStatus(userId, name);
 
     logger.info(`Game status created for userId: ${userId}`);
-    res.status(201).json(createResponse('success', 'Game status created'));
+    res.status(201).json(createResponse('success', 'Game status created', response));
   } catch (err) {
     next(err);
   }

@@ -7,7 +7,8 @@ const loginUserController = async (req: Request, res: Response, next: NextFuncti
   try {
     const { email, password }: Record<string, string> = req.body;
     const { userService } = req;
-
+    console.log('email : ', email);
+    console.log('password : ', password);
     if (!userService) {
       throw new CustomError('Internal server error', 500);
     }

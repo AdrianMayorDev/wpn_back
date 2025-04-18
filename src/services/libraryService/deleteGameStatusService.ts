@@ -10,6 +10,8 @@ const deleteGameStatusService = async (gameStatusModel: GameStatusModelDTO, game
 
   if (gameStatus.userId !== userId) throw new CustomError('Unauthorized', 401);
 
+  if (gameStatusId === '1') throw new CustomError('Cannot delete default game status', 400);
+
   await gameStatusModel.deleteGameStatus(gameStatusId);
 };
 

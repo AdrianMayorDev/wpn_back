@@ -37,7 +37,7 @@ describe('User ORM class', () => {
     expect(mockBaseQuery.getByField).toHaveBeenCalledWith({
       fieldsToSelect: ['email'],
       keyField: 'email',
-      value: 'john@example.com',
+      values: ['john@example.com'],
     });
     expect(result).toEqual(mockUser);
   });
@@ -56,7 +56,7 @@ describe('User ORM class', () => {
     expect(mockBaseQuery.getByField).toHaveBeenCalledWith({
       fieldsToSelect: ['email'],
       keyField: 'email',
-      value: 'nonexistent@example.com',
+      values: ['nonexistent@example.com'],
     });
     expect(result).toBeNull();
   });

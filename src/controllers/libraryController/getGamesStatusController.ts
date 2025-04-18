@@ -10,7 +10,7 @@ const getGameStatusController = async (req: Request, res: Response, next: NextFu
       throw new CustomError('Unauthorized', 401);
     }
 
-    const { gameId } = req.body;
+    const { gameId } = req.params;
     const { userId } = req.user;
     console.log('gameId', gameId);
     if (!userId) {

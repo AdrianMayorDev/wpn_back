@@ -5,6 +5,12 @@ import { createResponse } from '@/utils/response';
 import { CustomError } from '@/utils/CustomError';
 
 jest.mock('@/services/UserService');
+jest.mock('@/utils/logger', () => ({
+  logger: {
+    info: jest.fn(),
+    error: jest.fn(),
+  },
+}));
 
 describe('deleteUserController suite', () => {
   let req: Request;

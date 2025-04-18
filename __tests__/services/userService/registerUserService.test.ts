@@ -9,6 +9,12 @@ jest.mock('@/DTO/usersModel/UsersModelDTO');
 jest.mock('@/services/libraryService');
 jest.mock('@/utils/userValidations');
 jest.mock('bcryptjs');
+jest.mock('@/utils/logger', () => ({
+  logger: {
+    info: jest.fn(),
+    error: jest.fn(),
+  },
+}));
 
 describe('registerUserService', () => {
   let userQuery: jest.Mocked<UserModelDTO>;

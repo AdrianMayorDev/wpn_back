@@ -28,14 +28,14 @@ class GamesModelDTO extends BaseQuery<IGameData, IGameDataDB> {
     fieldsToSelect?: GameFields[];
   }): Promise<IGameData | null> {
     const keyField = this.fields.STEAM_GAME_ID;
-    const value = steamAppId;
-    const game = await this.getByField({ fieldsToSelect, keyField, value });
+    const values = [steamAppId];
+    const game = await this.getByField({ fieldsToSelect, keyField, values });
 
     if (!game) {
       return null;
     }
 
-    logger.info(`Game found: ${game[0].gameTitle}`);
+    logger.info(`Game found in Steam: ${game[0].gameTitle}`);
     console.info(game);
 
     if (!game) return null;
@@ -65,14 +65,14 @@ class GamesModelDTO extends BaseQuery<IGameData, IGameDataDB> {
     fieldsToSelect?: GameFields[];
   }): Promise<IGameData | null> {
     const keyField = this.fields.GAME_ID;
-    const value = gameId;
-    const game = await this.getByField({ fieldsToSelect, keyField, value });
+    const values = [gameId];
+    const game = await this.getByField({ fieldsToSelect, keyField, values });
 
     if (!game) {
       return null;
     }
 
-    logger.info(`Game found: ${game[0].gameTitle}`);
+    logger.info(`Game found in DB: ${game[0].gameTitle}`);
     console.info(game);
 
     if (!game) return null;

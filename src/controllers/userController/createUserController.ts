@@ -5,7 +5,8 @@ import { NextFunction, Request, Response } from 'express';
 
 const createUserController = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { steamNick, steamUserId, email, password }: Record<string, string> = req.body;
+    const { steamNick, steamUserId, email, password, steamAvatar }: Record<string, string> = req.body;
+
     const { userService } = req;
 
     if (!userService) {
@@ -16,7 +17,7 @@ const createUserController = async (req: Request, res: Response, next: NextFunct
       throw new CustomError('Invalid input', 400);
     }
 
-    const userData = { email, password, steamNick, steamUserId };
+    const userData = { email, password, steamNick, steamUserId, steamAvatar };
 
     // Register user
     const response = await userService.registerUser(userData);

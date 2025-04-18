@@ -5,7 +5,7 @@ const assignGameStatusService = async (
   libraryModel: LibraryModelDTO,
   userId: string,
   gameId: string,
-  gameStatusId: number
+  gameStatusId: string
 ) => {
   const isGameInLibrary = await libraryModel.getGameInUserLibrary({ userId, gameId });
   if (!isGameInLibrary) throw new CustomError('Game not found in library', 404);

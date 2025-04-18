@@ -17,7 +17,7 @@ const assignGameStatusController = async (req: Request, res: Response, next: Nex
       throw new CustomError('Unauthorized', 401);
     }
 
-    if (!gameId || typeof gameId !== 'string' || !gameStatusId || typeof gameStatusId !== 'number') {
+    if (!gameId || typeof gameId !== 'string' || !gameStatusId || typeof gameStatusId !== 'string') {
       throw new CustomError('Invalid game or status ID', 400);
     }
 

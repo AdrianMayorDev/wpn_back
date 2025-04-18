@@ -5,7 +5,7 @@ enum UserFields {
   STEAMUSERID = 'steam_user_id',
   EMAIL = 'email',
   PASSWORD = 'password',
-  AVATAR = 'avatar_url',
+  STEAMAVATAR = 'avatar_url',
 }
 
 interface IUserData {
@@ -15,6 +15,7 @@ interface IUserData {
   email: string;
   newPassword?: string;
   table?: string;
+  steamAvatar?: string;
 }
 
 interface IUserDataDB {
@@ -23,7 +24,7 @@ interface IUserDataDB {
   [UserFields.STEAMUSERID]: string;
   [UserFields.EMAIL]: string;
   [UserFields.PASSWORD]: string;
-  [UserFields.AVATAR]: string;
+  [UserFields.STEAMAVATAR]: string;
 }
 
 interface IUserWithPassword extends IUserData {
@@ -37,6 +38,8 @@ interface IUserWithID extends Omit<IUserWithPassword, 'userId'> {
 interface IUserPayload {
   userId: string;
   email: string;
+  steamAvatar: string;
+  steamUserId: string;
 }
 
 const userFieldMapping: Record<string, string> = {
@@ -45,7 +48,7 @@ const userFieldMapping: Record<string, string> = {
   steamUserId: UserFields.STEAMUSERID,
   email: UserFields.EMAIL,
   password: UserFields.PASSWORD,
-  avatar: UserFields.AVATAR,
+  steamAvatar: UserFields.STEAMAVATAR,
 };
 
 const mapUserToDbFields = (data: IUserData): IUserDataDB => {

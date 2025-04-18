@@ -84,7 +84,7 @@ class LibraryModelDTO extends BaseQuery<ILibraryData, ILibraryDataDB> {
       this.fields.MANUAL_INDEX,
     ];
     const keyField = this.fields.USER_ID;
-    const userLibrary = await this.getByField({ fieldsToSelect, keyField, value: userId });
+    const userLibrary = await this.getByField({ fieldsToSelect, keyField, values: [userId] });
     return userLibrary;
   }
 
