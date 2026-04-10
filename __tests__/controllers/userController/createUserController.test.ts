@@ -6,7 +6,7 @@ import { CustomError } from '@/utils/CustomError';
 import { IUserData } from '@/interfaces/userModel.interface';
 
 // Mocks dependency
-jest.mock('@/services/UserService');
+jest.mock('@/services/userService');
 
 describe('createUserController suite', () => {
   let req: Request;

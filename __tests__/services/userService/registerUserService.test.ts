@@ -1,12 +1,16 @@
 import UserModelDTO from '@/DTO/usersModel/UsersModelDTO';
 import { IUserWithPassword } from '@/interfaces/userModel.interface';
-import registerUserService from '@/services/userService/regsiterUserService';
+import registerUserService from '@/services/userService/registerUserService';
 import { CustomError } from '@/utils/CustomError';
 import { isValidEmail, isValidPassword } from '@/utils/userValidations';
 import bcrypt from 'bcryptjs';
 
 jest.mock('@/DTO/usersModel/UsersModelDTO');
-jest.mock('@/services/libraryService');
+jest.mock('@/services/libraryService', () => {
+  return jest.fn().mockImplementation(() => ({
+    createGameStatus: jest.fn().mockResolvedValue(undefined),
+  }));
+});
 jest.mock('@/utils/userValidations');
 jest.mock('bcryptjs');
 

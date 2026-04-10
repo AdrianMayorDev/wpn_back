@@ -4,7 +4,7 @@ import { deleteUserController } from '@/controllers/userController';
 import { createResponse } from '@/utils/response';
 import { CustomError } from '@/utils/CustomError';
 
-jest.mock('@/services/UserService');
+jest.mock('@/services/userService');
 
 describe('deleteUserController suite', () => {
   let req: Request;

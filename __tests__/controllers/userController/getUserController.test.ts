@@ -5,7 +5,7 @@ import { createResponse } from '@/utils/response';
 import { NextFunction, Request, Response } from 'express';
 
 // Mocks dependency
-jest.mock('@/services/UserService');
+jest.mock('@/services/userService');
 jest.mock('@/DTO/usersModel/UsersModelDTO');
 
 describe('getUserController suite', () => {

@@ -5,7 +5,7 @@ import { createResponse } from '@/utils/response';
 import { IUserData } from '@/interfaces/userModel.interface';
 import { CustomError } from '@/utils/CustomError';
 
-jest.mock('@/services/UserService');
+jest.mock('@/services/userService');
 
 describe('updateUserController suite', () => {
   let req: Request;

@@ -3,7 +3,7 @@
 
 #Check if the current branch is protected branch
 CURRENT_BRANCH=$(git branch --show-current)
-PROTECTED_BRANCHES=("main", "master", "develop")
+PROTECTED_BRANCHES=("main" "master")
 
 if [[ $CURRENT_BRANCH =~ ^release/ ]]; then
     echo "🚫 Pushing to the $CURRENT_BRANCH branch is not allowed."

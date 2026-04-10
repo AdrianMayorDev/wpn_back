@@ -5,7 +5,7 @@ import { loginUserController } from '@/controllers/userController';
 import { CustomError } from '@/utils/CustomError';
 
 // Mocks dependency
-jest.mock('@/services/UserService');
+jest.mock('@/services/userService');
 
 describe('loginUserController suite', () => {
   let req: Request;
