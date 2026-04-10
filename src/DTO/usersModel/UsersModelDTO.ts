@@ -62,14 +62,12 @@ class UserModelDTO extends BaseQuery<IUserWithID, IUserDataDB> {
     if (!user) return null;
 
     logger.info(`User found: ${user[0].email}`);
-    console.info(user);
 
     return user[0];
   }
 
   async createNewUser(user: IUserData) {
     logger.info(`Creating new user: ${user.email}`);
-    console.info(user);
     const response = await this.insert(user);
 
     logger.info(`User created: ${user.email}`);

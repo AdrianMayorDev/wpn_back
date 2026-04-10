@@ -13,7 +13,7 @@ export interface IRegisterUserService {
 
 const registerUserService = async (userQuery: UserModelDTO, user: IUserWithPassword): Promise<IUserData> => {
   const { email, password, steamNick, steamUserId } = user;
-  logger.info(`email: ${email}, password: ${password}, steamNick: ${steamNick}`);
+  logger.info(`Registering user: ${email}`);
 
   const existingUser = await userQuery.getUserByEmail({ email });
 

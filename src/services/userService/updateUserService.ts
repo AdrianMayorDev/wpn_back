@@ -15,18 +15,6 @@ const updateUserService = async (userQuery: UserModelDTO, user: IUserWithPasswor
     throw new CustomError('User not found', 404);
   }
 
-  // if (newSteamNick) {
-  //   if (newSteamNick === currentUser.steamNick) {
-  //     throw new CustomError('This Steam Nick is already in use by your account', 409);
-  //   }
-
-  //   const checkSteamId = await userQuery.getSteamIdBySteamNick(newSteamNick);
-
-  //   if (checkSteamId && checkSteamId !== steamId) {
-  //     throw new CustomError("Steam ID doesn't match the Steam Nick", 400);
-  //   }
-  // }
-
   // Validating current password
   const isPasswordValid = await bcrypt.compare(password, currentUser.password);
 
@@ -48,7 +36,6 @@ const updateUserService = async (userQuery: UserModelDTO, user: IUserWithPasswor
     logger.info(`Checking if email ${newEmail} is already in use by another user`);
     const fieldsToSelect = [UserFields.EMAIL, UserFields.ID];
     const existingEmailUser = await userQuery.getUserByEmail({ fieldsToSelect, email: newEmail });
-    console.info(`Existing user: `, existingEmailUser);
     if (existingEmailUser && existingEmailUser.userId !== currentUser.userId) {
       throw new CustomError('Email already in use by another user', 409);
     }
@@ -56,7 +43,7 @@ const updateUserService = async (userQuery: UserModelDTO, user: IUserWithPasswor
 
   // Validating and updating new password
   if (newPassword && !isValidPassword(newPassword)) {
-    logger.info(`Invalid password format: ${password}`);
+    logger.info('Invalid password format provided');
     throw new CustomError('Invalid password format', 400);
   }
 

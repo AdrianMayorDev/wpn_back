@@ -5,7 +5,6 @@ import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { CustomError } from '../utils/CustomError';
 import UserService from '@/services/userService';
-// import '@mytypes/express';
 
 declare module 'express-serve-static-core' {
   interface Request {

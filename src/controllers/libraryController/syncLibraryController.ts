@@ -20,10 +20,6 @@ const syncLibraryController = async (req: Request, res: Response, next: NextFunc
 
     const { steamNick, steamId } = req.body;
 
-    if (!userId || !email) {
-      throw new CustomError('Unauthorized', 401);
-    }
-
     if (typeof steamNick !== 'string' || typeof steamId !== 'string') {
       throw new CustomError('Invalid steamNick or steamId', 400);
     }

@@ -1,7 +1,6 @@
 import { IHowLongToBeatData, IMetacriticData } from '@/interfaces/gameModel.interface';
 import { logger } from '@/utils/logger';
-import * as puppeteer from 'puppeteer';
-import { launch } from 'puppeteer';
+import { launch, HTTPRequest } from 'puppeteer';
 import * as fs from 'fs';
 import * as path from 'path';
 
@@ -22,7 +21,7 @@ class ScrappingService {
     }
 
     const browser = await launch({
-      headless: false,
+      headless: true,
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
       defaultViewport: { width: 1280, height: 800 },
     });
@@ -30,7 +29,7 @@ class ScrappingService {
 
     try {
       await page.setRequestInterception(true);
-      page.on('request', (request: puppeteer.HTTPRequest) => {
+      page.on('request', (request: HTTPRequest) => {
         void request.continue();
       });
 
@@ -107,10 +106,7 @@ class ScrappingService {
     await browser.close();
 
     const gameGenres = gameItem.genres?.map((genre: { name: string }) => genre.name);
-    console.info('gameGenresRaw ', gameItem.genres);
-    console.info('gameGenres', gameGenres);
     const gamePlatforms = gameItem.platforms?.map((platform: { name: string }) => platform.name);
-    console.info('gamePlatformsRaw ', gameItem.platforms);
 
     const dataToSend: IMetacriticData = {
       metacriticId: gameID,

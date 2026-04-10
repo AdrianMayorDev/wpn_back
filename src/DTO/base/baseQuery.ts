@@ -31,7 +31,6 @@ abstract class BaseQuery<T extends Record<string, any>, DBType extends Record<st
       const [result] = await connection.execute<ResultSetHeader>(query, values);
 
       logger.info(`Inserted ${result.affectedRows} rows`);
-      console.info(`Result: `, result);
 
       return this.mapToModel(mappedData) as T;
     } catch (err) {
@@ -54,7 +53,6 @@ abstract class BaseQuery<T extends Record<string, any>, DBType extends Record<st
       const [result] = await connection.execute<ResultSetHeader>(query, values.flat());
 
       logger.info(`Inserted ${result.affectedRows} rows`);
-      console.info(`Result: `, result);
 
       return mappedData.map((item) => this.mapToModel(item)) as T[];
     } catch (err) {
@@ -81,7 +79,7 @@ abstract class BaseQuery<T extends Record<string, any>, DBType extends Record<st
 
       const [result] = await connection.execute<ResultSetHeader>(query, values);
 
-      console.info(`Result: `, result);
+      logger.info(`Updated ${result.affectedRows} rows`);
 
       return this.mapToModel(mappedData) as T;
     } catch (err) {
@@ -90,26 +88,6 @@ abstract class BaseQuery<T extends Record<string, any>, DBType extends Record<st
       connection.release();
     }
   }
-
-  // Read
-  // async getById({ fieldsToSelect, keyField }: { fieldsToSelect: string[], keyField: string }) {
-  //   const connection = await getConnection();
-  //   try {
-  //     const select = fieldsToSelect.join(', ');
-  //     logger.info(`Select keys: ${select} ${this.id}`);
-  //     const [rows] = await connection.execute(`SELECT ${select} FROM ${this.table} WHERE ${} = ?`, [this.id]);
-  //     const data = rows as DBType[];
-
-  //     if (data.length > 0) {
-  //       return this.mapToModel(data[0]);
-  //     }
-  //     return null;
-  //   } catch (err) {
-  //     throw new CustomError('Error fetching data by ID', 500, err as Error);
-  //   } finally {
-  //     connection.release();
-  //   }
-  // }
 
   async getByField({
     fieldsToSelect,

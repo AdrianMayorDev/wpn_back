@@ -1,7 +1,7 @@
 import { IUserData, IUserLogin, IUserWithID, IUserWithPassword } from '@/interfaces/userModel.interface';
 import { JwtPayload } from 'jsonwebtoken';
 import UserModelDTO from '@/DTO/usersModel/UsersModelDTO';
-import registerUserService from './userService/regsiterUserService';
+import registerUserService from './userService/registerUserService';
 import updateUserService from './userService/updateUserService';
 import loginUserService from './userService/loginUserService';
 import deleteUserService from './userService/deleteUserService';

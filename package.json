@@ -9,7 +9,7 @@
     "uuid": "^11.1.0"
   },
   "name": "wpn_back",
-  "description": "",
+  "description": "Backend API for WPN - a quality-per-hour gaming backlog prioritizer combining Metacritic and HowLongToBeat data",
   "version": "0.1.0",
   "main": "dist/server.js",
   "scripts": {
@@ -22,7 +22,7 @@
     "test": "LOG_LEVEL=info NODE_ENV=test npx jest --coverage"
   },
   "keywords": [],
-  "author": "",
+  "author": "Adrian Mayor",
   "license": "ISC",
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",

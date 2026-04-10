@@ -26,7 +26,6 @@ class GameStatusModelDTO extends BaseQuery<IGameStatusData, IGameStatusDataDB> {
   }
 
   async createGameStatus(data: IGameStatusData) {
-    // const { userId, name } = data;
     logger.debug(`gameStatusData: `, data);
     logger.info(`Creating game status: ${data.name}`);
     const response = await this.insert(data);

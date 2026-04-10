@@ -17,7 +17,6 @@ async function loginUserService(userQuery: UserModelDTO, credentials: IUserLogin
     throw new CustomError('Invalid email or password', 401);
   }
   logger.info(`User ${user.email} found`);
-  console.info(user);
 
   const isPasswordValid = await bcrypt.compare(password, user.password);
 

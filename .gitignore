@@ -1,6 +1,6 @@
 .env
 dist/
-node_modules
+node_modules/
 .eslintcache
-coverage
-logs
+coverage/
+logs/

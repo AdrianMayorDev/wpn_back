@@ -1,5 +1,3 @@
-import { logger } from '@/utils/logger';
-
 enum GameFields {
   ALL = '*',
   GAME_ID = 'game_id',
@@ -127,8 +125,6 @@ const mapGamesToDbFields = (data: IGameData): IGameDataDB => {
   for (const key in data) {
     if (fieldMapping[key]) {
       mappedData[fieldMapping[key]] = data[key as keyof IGameData];
-    } else {
-      logger.error(`Key ${key} not found in fieldMapping`);
     }
   }
   return mappedData;
@@ -140,8 +136,6 @@ const mapGamesToModel = (data: IGameDataDB): IGameData => {
     const modelKey = Object.keys(fieldMapping).find((k) => fieldMapping[k] === key);
     if (modelKey) {
       mappedData[modelKey] = data[key as keyof IGameDataDB];
-    } else {
-      logger.error(`Key ${key} not found in fieldMapping`);
     }
   }
   return mappedData;

@@ -6,7 +6,7 @@ const updateGameStatusService = async (gameStatusModel: GameStatusModelDTO, game
   const { gameStatusId, userId, name } = gameStatusData;
 
   const gameStatus = await gameStatusModel.getGameStatusById(gameStatusId);
-  if (!gameStatus) throw new Error('Game status not found');
+  if (!gameStatus) throw new CustomError('Game status not found', 404);
 
   if (gameStatus.userId !== userId) throw new CustomError('Unauthorized', 401);
 

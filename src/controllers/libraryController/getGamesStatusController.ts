@@ -12,13 +12,13 @@ const getGameStatusController = async (req: Request, res: Response, next: NextFu
 
     const { gameId } = req.body;
     const { userId } = req.user;
-    console.log('gameId', gameId);
+
     if (!userId) {
       throw new CustomError('Unauthorized', 401);
     }
 
     if (!gameId || typeof gameId !== 'string') {
-      throw new Error('Invalid game ID');
+      throw new CustomError('Invalid game ID', 400);
     }
 
     const service = new LibraryService();

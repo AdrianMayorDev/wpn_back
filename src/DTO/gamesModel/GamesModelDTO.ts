@@ -36,9 +36,6 @@ class GamesModelDTO extends BaseQuery<IGameData, IGameDataDB> {
     }
 
     logger.info(`Game found: ${game[0].gameTitle}`);
-    console.info(game);
-
-    if (!game) return null;
     return game[0];
   }
 
@@ -46,7 +43,6 @@ class GamesModelDTO extends BaseQuery<IGameData, IGameDataDB> {
     const response = await this.insert(game);
 
     logger.info(`Game created: ${game.gameTitle}`);
-    console.info(response);
 
     return response;
   }
@@ -73,9 +69,6 @@ class GamesModelDTO extends BaseQuery<IGameData, IGameDataDB> {
     }
 
     logger.info(`Game found: ${game[0].gameTitle}`);
-    console.info(game);
-
-    if (!game) return null;
     return game[0];
   }
 }

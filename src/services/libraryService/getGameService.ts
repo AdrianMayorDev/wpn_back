@@ -1,9 +1,10 @@
 import GamesModelDTO from '@/DTO/gamesModel/GamesModelDTO';
+import { CustomError } from '@/utils/CustomError';
 
 const getGameService = async (gameModel: GamesModelDTO, gameId: string) => {
   const game = await gameModel.getGame({ gameId });
   if (!game) {
-    throw new Error('Game not found');
+    throw new CustomError('Game not found', 404);
   }
   return game;
 };

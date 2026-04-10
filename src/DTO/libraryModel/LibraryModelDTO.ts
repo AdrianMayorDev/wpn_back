@@ -41,7 +41,6 @@ class LibraryModelDTO extends BaseQuery<ILibraryData, ILibraryDataDB> {
     if (!game) return null;
 
     logger.info(`Game found in library: ${game.gameId}`);
-    console.info(game);
 
     return game;
   }
@@ -97,7 +96,6 @@ class LibraryModelDTO extends BaseQuery<ILibraryData, ILibraryDataDB> {
     if (!gameStatus) return null;
 
     logger.info(`Game status found in library: `, gameStatus);
-    console.info(gameStatus);
 
     return gameStatus;
   }
