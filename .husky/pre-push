@@ -1,0 +1,21 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+#Check if the current branch is protected branch
+CURRENT_BRANCH=$(git branch --show-current)
+PROTECTED_BRANCHES=("main", "master", "develop")
+
+if [[ $CURRENT_BRANCH =~ ^release/ ]]; then
+    echo "🚫 Pushing to the $CURRENT_BRANCH branch is not allowed."
+    exit 1
+fi
+
+for BRANCH in "${PROTECTED_BRANCHES[@]}"; do
+  if [ "$CURRENT_BRANCH" == "$BRANCH" ]; then
+    echo "🚫 Pushing to the $CURRENT_BRANCH branch is not allowed."
+    exit 1
+  fi
+done
+
+# Run tests before push
+npm run test
