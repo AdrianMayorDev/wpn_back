@@ -54,7 +54,11 @@ class Logger {
     if (logFiles.length > MAX_LOG_FILES) {
       const filesToDelete = logFiles.slice(0, logFiles.length - MAX_LOG_FILES);
       for (const file of filesToDelete) {
-        fs.unlinkSync(path.join(LOG_DIR, file));
+        try {
+          fs.unlinkSync(path.join(LOG_DIR, file));
+        } catch {
+          // File may have been already deleted by a concurrent process
+        }
       }
     }
   }
