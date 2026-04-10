@@ -1,6 +1,6 @@
 import { IUserData } from '@/interfaces/userModel.interface';
 import { IGetSteamOwnedGames } from '@/interfaces/response.interface';
-import ScrapingService from '../scrappingService/ScrapingService';
+import ScrapingService from '../scrapingService/ScrapingService';
 import GamesModel from '@/DTO/gamesModel/GamesModelDTO';
 import LibraryModelDTO from '@/DTO/libraryModel/LibraryModelDTO';
 import { logger } from '@/utils/logger';
