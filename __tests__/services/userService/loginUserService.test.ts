@@ -73,7 +73,7 @@ describe('loginUserService', () => {
 
     // Then
     expect(result).toEqual({ token });
-    expect(jwt.sign).toHaveBeenCalledWith({ userId: user.userId, email: user.email }, 'secret', {
+    expect(jwt.sign).toHaveBeenCalledWith({ userId: user.userId, email: user.email }, 'test_jwt_secret', {
       expiresIn: '3d',
     });
   });
